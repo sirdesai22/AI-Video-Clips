@@ -16,8 +16,8 @@ export function getDb(): Database.Database {
   const p = dbPath();
   if (p !== ":memory:") fs.mkdirSync(path.dirname(p), { recursive: true });
   db = new Database(p);
-  db.pragma("journal_mode = WAL");
   db.pragma("busy_timeout = 5000");
+  db.pragma("journal_mode = WAL");
   db.exec(`
     CREATE TABLE IF NOT EXISTS videos (
       id TEXT PRIMARY KEY, format TEXT NOT NULL, input TEXT NOT NULL, options TEXT NOT NULL,
@@ -122,10 +122,12 @@ export function updateVideo(id: string, patch: VideoPatch): Video {
 
 export function addScript(videoId: string, script: unknown, note: string | null): number {
   const d = getDb();
-  const next = ((d.prepare(`SELECT MAX(version) AS m FROM scripts WHERE video_id = ?`).get(videoId) as Row).m as number ?? 0) + 1;
-  d.prepare(`INSERT INTO scripts (video_id, version, json, note, created_at) VALUES (?, ?, ?, ?, ?)`)
-    .run(videoId, next, JSON.stringify(script), note, now());
-  return next;
+  return d.transaction(() => {
+    const next = ((d.prepare(`SELECT MAX(version) AS m FROM scripts WHERE video_id = ?`).get(videoId) as Row).m as number ?? 0) + 1;
+    d.prepare(`INSERT INTO scripts (video_id, version, json, note, created_at) VALUES (?, ?, ?, ?, ?)`)
+      .run(videoId, next, JSON.stringify(script), note, now());
+    return next;
+  }).immediate();
 }
 
 export function getScript(videoId: string, version?: number): ScriptRow | null {
@@ -145,10 +147,12 @@ export function listScripts(videoId: string): Omit<ScriptRow, "script">[] {
 
 export function addRender(videoId: string, r: { path: string; posterPath: string | null; durationS: number }): number {
   const d = getDb();
-  const next = ((d.prepare(`SELECT MAX(version) AS m FROM renders WHERE video_id = ?`).get(videoId) as Row).m as number ?? 0) + 1;
-  d.prepare(`INSERT INTO renders (video_id, version, path, poster_path, duration_s, created_at) VALUES (?, ?, ?, ?, ?, ?)`)
-    .run(videoId, next, r.path, r.posterPath, r.durationS, now());
-  return next;
+  return d.transaction(() => {
+    const next = ((d.prepare(`SELECT MAX(version) AS m FROM renders WHERE video_id = ?`).get(videoId) as Row).m as number ?? 0) + 1;
+    d.prepare(`INSERT INTO renders (video_id, version, path, poster_path, duration_s, created_at) VALUES (?, ?, ?, ?, ?, ?)`)
+      .run(videoId, next, r.path, r.posterPath, r.durationS, now());
+    return next;
+  }).immediate();
 }
 
 export function listRenders(videoId: string): Render[] {
@@ -173,7 +177,7 @@ export function claimNextJob(): Job | null {
     const t = now();
     d.prepare(`UPDATE jobs SET state = 'running', started_at = ? WHERE id = ?`).run(t, r.id);
     return toJob({ ...r, state: "running", started_at: t });
-  })();
+  }).immediate();
 }
 
 export function finishJob(id: number, state: "done" | "failed"): void {

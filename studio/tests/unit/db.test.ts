@@ -55,6 +55,17 @@ describe("jobs", () => {
     expect(db.claimNextJob()).toBeNull();
   });
 
+  it("leaves queued and done jobs untouched on restart", () => {
+    const v = db.createVideo({ format: "reel", input: "x", options: {} });
+    const done = db.enqueueJob(v.id, "script", {});
+    db.claimNextJob();
+    db.finishJob(done.id, "done");
+    db.enqueueJob(v.id, "build", { mode: "new" });
+    expect(db.markInterrupted()).toBe(0);
+    expect(db.getVideo(v.id)?.status).toBe("scripting");
+    expect(db.claimNextJob()?.kind).toBe("build");
+  });
+
   it("marks an interrupted script job as script_failed", () => {
     const v = db.createVideo({ format: "reel", input: "x", options: {} });
     db.enqueueJob(v.id, "script", {});

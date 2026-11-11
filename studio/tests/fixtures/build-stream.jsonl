@@ -1,0 +1,9 @@
+{"type":"system","subtype":"init","cwd":"/x","session_id":"fake-session","tools":["Bash","Read"]}
+{"type":"assistant","message":{"content":[{"type":"text","text":"STAGE: voice\nRecording the narration."},{"type":"tool_use","id":"t1","name":"Bash","input":{"command":"npx hyperframes tts \"Fifty-nine seconds.\" -v am_michael -o assets/voice/01.wav"}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t1","content":"Generated 4.1s of speech"}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"STAGE: music"}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"STAGE: look"},{"type":"tool_use","id":"t2","name":"Write","input":{"file_path":"/x/project/SPEC.md","content":"..."}}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"STAGE: scenes"},{"type":"tool_use","id":"t3","name":"Write","input":{"file_path":"/x/project/compositions/hook.html","content":"..."}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"t4","name":"Bash","input":{"command":"npx hyperframes check --json"}}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"STAGE: render"},{"type":"tool_use","id":"t5","name":"Bash","input":{"command":"npx hyperframes render --output renders/v1.mp4"}}]}}
+{"type":"result","subtype":"success","is_error":false,"result":"Rendered renders/v1.mp4","session_id":"fake-session"}

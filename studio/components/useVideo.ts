@@ -7,6 +7,7 @@ export function useVideo(id: string) {
   const [detail, setDetail] = useState<VideoDetail | null>(null);
   const [events, setEvents] = useState<VideoEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const lastEventId = useRef(0);
   const lastStatus = useRef<string | null>(null);
   const lastScript = useRef<number | null>(null);
   const lastRender = useRef<number | null>(null);
@@ -16,6 +17,7 @@ export function useVideo(id: string) {
       const r = await fetch(`/api/videos/${id}`);
       if (!r.ok) { setError(r.status === 404 ? "This video doesn't exist." : "Couldn't load the video."); return; }
       setDetail(await r.json());
+      setError(null);
     } catch {
       setError("Couldn't load the video.");
     }
@@ -28,7 +30,11 @@ export function useVideo(id: string) {
     const es = new EventSource(`/api/videos/${id}/events`);
     es.onmessage = (m) => {
       const { video, events: evs } = JSON.parse(m.data) as { video: Video; events: VideoEvent[] };
-      if (evs.length) setEvents((prev) => [...prev, ...evs].slice(-800));
+      const fresh = evs.filter((e) => e.id > lastEventId.current);
+      if (fresh.length) {
+        lastEventId.current = fresh[fresh.length - 1].id;
+        setEvents((prev) => [...prev, ...fresh].slice(-800));
+      }
       setDetail((d) => (d ? { ...d, video } : d));
       const changed =
         video.status !== lastStatus.current ||

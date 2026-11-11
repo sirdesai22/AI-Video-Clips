@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  let after = Number(new URL(req.url).searchParams.get("after") ?? 0);
+  const url = new URL(req.url);
+  let after = Number(req.headers.get("last-event-id") ?? url.searchParams.get("after") ?? 0) || 0;
   const enc = new TextEncoder();
   let timer: ReturnType<typeof setInterval>;
   const stream = new ReadableStream({
@@ -19,7 +20,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
         const vj = JSON.stringify(video);
         if (events.length || vj !== lastVideo) {
           lastVideo = vj;
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ video, events })}\n\n`));
+          controller.enqueue(enc.encode(`id: ${after}\ndata: ${JSON.stringify({ video, events })}\n\n`));
         }
       };
       tick();

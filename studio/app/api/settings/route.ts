@@ -5,9 +5,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const force = new URL(req.url).searchParams.get("recheck") === "1";
+  const q = new URL(req.url).searchParams;
+  const force = q.get("recheck") === "1";
   return Response.json({
-    heygen: await heygenStatus(force),
+    heygen: q.get("heygen") === "0" ? "unknown" : await heygenStatus(force),
     defaultVoice: getSetting("default_voice") ?? "am_michael",
     defaultFormat: getSetting("default_format") ?? "reel",
     model: getSetting("model") ?? "",

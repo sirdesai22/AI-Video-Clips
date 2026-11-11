@@ -138,11 +138,11 @@ export default function ScriptReview({ detail, onChange }: { detail: VideoDetail
         </div>
       )}
       {heygenWarn && (
-        <div className="card flex flex-col gap-3 border-warn">
+        <div role="alert" className="card flex flex-col gap-3 border-warn">
           <p className="text-sm">You&apos;re not signed in to HeyGen, so this video won&apos;t have music. In a terminal, run <code>npx hyperframes auth login</code>.</p>
           <div className="flex gap-3">
             <button className="btn-secondary" disabled={busy || checking} onClick={() => approve(true)}>Build without music</button>
-            <button className="btn-secondary" disabled={busy || checking} onClick={recheckAndApprove}>{checking ? "Checking…" : "I\'ve signed in"}</button>
+            <button className="btn-secondary" disabled={busy || checking} onClick={recheckAndApprove}>{checking ? "Checking…" : "I've signed in"}</button>
           </div>
         </div>
       )}

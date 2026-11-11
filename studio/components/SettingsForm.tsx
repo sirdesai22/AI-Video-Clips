@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BottomBar } from "./ui";
 
 type Heygen = "signed_in" | "signed_out" | "unknown";
@@ -29,23 +29,25 @@ export default function SettingsForm() {
   const [loadError, setLoadError] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const touched = useRef(false);
+  const [loaded, setLoaded] = useState(false);
+  const [checkError, setCheckError] = useState(false);
 
-  // The first load can take up to a minute while HeyGen is checked, so the form shows right away.
-  const apply = (p: Promise<Response>) =>
-    p.then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-      .then((d) => {
-        setLoadError(false);
-        setHeygen(d.heygen);
-        if (!touched.current) setForm({ defaultVoice: d.defaultVoice, defaultFormat: d.defaultFormat, model: d.model });
-      })
-      .catch(() => { setLoadError(true); setHeygen("unknown"); });
-  useEffect(() => { void apply(fetch("/api/settings")); }, []);
+  // Stored defaults load fast; the HeyGen check can take up to a minute, so it loads separately.
+  const checkHeygen = (recheck: boolean) =>
+    fetch(`/api/settings${recheck ? "?recheck=1" : ""}`)
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((d) => { setHeygen(d.heygen); setCheckError(false); })
+      .catch(() => { setHeygen("unknown"); setCheckError(true); });
+  useEffect(() => {
+    fetch("/api/settings?heygen=0")
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((d) => { setForm({ defaultVoice: d.defaultVoice, defaultFormat: d.defaultFormat, model: d.model }); setLoaded(true); })
+      .catch(() => setLoadError(true));
+    void checkHeygen(false);
+  }, []);
 
-  const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    touched.current = true;
+  const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
-  };
 
   async function save() {
     setSaving(true);
@@ -65,6 +67,7 @@ export default function SettingsForm() {
     heygen === "checking" ? "Checking HeyGen…"
     : heygen === "signed_in" ? "Signed in. Videos get music and sound effects."
     : heygen === "signed_out" ? "Not signed in. In a terminal, run: npx hyperframes auth login"
+    : checkError ? "Couldn't check HeyGen right now."
     : "Couldn't check right now.";
 
   return (
@@ -74,7 +77,7 @@ export default function SettingsForm() {
       <div className="card flex flex-col gap-2">
         <p className="text-sm font-medium">HeyGen music library</p>
         <p className="text-sm text-muted">{heygenText}</p>
-        <button className="btn-secondary self-start" disabled={heygen === "checking"} onClick={() => { setHeygen("checking"); void apply(fetch("/api/settings?recheck=1")); }}>Check again</button>
+        <button className="btn-secondary self-start" disabled={heygen === "checking"} onClick={() => { setHeygen("checking"); void checkHeygen(true); }}>Check again</button>
       </div>
       <Labeled label="Default format">
         <select className="field" value={form.defaultFormat} onChange={set("defaultFormat")}>
@@ -91,7 +94,7 @@ export default function SettingsForm() {
         <input className="field" value={form.model} placeholder="e.g. sonnet" onChange={set("model")} />
       </Labeled>
       {msg && <p role="status" className="text-sm text-muted">{msg}</p>}
-      <BottomBar><button className="btn-primary" disabled={saving} onClick={save}>{saving ? "Saving…" : "Save settings"}</button></BottomBar>
+      <BottomBar><button className="btn-primary" disabled={saving || !loaded} onClick={save}>{saving ? "Saving…" : "Save settings"}</button></BottomBar>
     </div>
   );
 }

@@ -18,11 +18,20 @@ const FORMATS: { id: Format; title: string; sub: string }[] = [
   { id: "explainer", title: "Explainer", sub: "16:9 · 45–90 s" },
 ];
 
+function Labeled({ label, wide, children }: { label: string; wide?: boolean; children: React.ReactNode }) {
+  return (
+    <label className={`flex flex-col gap-1.5 ${wide ? "col-span-2" : ""}`}>
+      <span className="text-sm text-muted">{label}</span>
+      {children}
+    </label>
+  );
+}
+
 export default function NewVideoForm() {
   const router = useRouter();
   const [format, setFormat] = useState<Format>("reel");
   const [input, setInput] = useState("");
-  const [opts, setOpts] = useState({ tone: "", length: "", audience: "", voice: "", exactWording: "", cta: "" });
+  const [opts, setOpts] = useState({ tone: "", length: "", audience: "", voice: "am_michael", exactWording: "", cta: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,10 +45,15 @@ export default function NewVideoForm() {
   async function submit() {
     setBusy(true);
     setError(null);
-    const r = await fetch("/api/videos", { method: "POST", body: JSON.stringify({ format, input, options: opts }) });
-    const d = await r.json();
-    if (!r.ok) { setBusy(false); setError(d.error ?? "Something went wrong"); return; }
-    router.push(`/v/${d.video.id}`);
+    try {
+      const r = await fetch("/api/videos", { method: "POST", body: JSON.stringify({ format, input, options: opts }) });
+      const d = await r.json();
+      if (!r.ok) { setError(d.error ?? "Something went wrong"); setBusy(false); return; }
+      router.push(`/v/${d.video.id}`);
+    } catch {
+      setError("Couldn't start — is the app still running?");
+      setBusy(false);
+    }
   }
 
   const set = (k: keyof typeof opts) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -65,14 +79,16 @@ export default function NewVideoForm() {
 
       <Disclosure summary="More options">
         <div className="grid grid-cols-2 gap-4">
-          <input className="field" placeholder="Tone (e.g. bold, calm, funny)" value={opts.tone} onChange={set("tone")} />
-          <input className="field" placeholder="Length (e.g. about 30 seconds)" value={opts.length} onChange={set("length")} />
-          <input className="field" placeholder="Audience" value={opts.audience} onChange={set("audience")} />
-          <select className="field" aria-label="Voice" value={opts.voice} onChange={set("voice")}>
-            {VOICES.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
-          </select>
-          <textarea className="field col-span-2" rows={2} placeholder="Wording that must stay exact" value={opts.exactWording} onChange={set("exactWording")} />
-          <input className="field col-span-2" placeholder="Ending or call to action" value={opts.cta} onChange={set("cta")} />
+          <Labeled label="Tone"><input className="field" placeholder="e.g. bold, calm, funny" value={opts.tone} onChange={set("tone")} /></Labeled>
+          <Labeled label="Length"><input className="field" placeholder="e.g. about 30 seconds" value={opts.length} onChange={set("length")} /></Labeled>
+          <Labeled label="Audience"><input className="field" placeholder="e.g. new parents" value={opts.audience} onChange={set("audience")} /></Labeled>
+          <Labeled label="Voice">
+            <select className="field" value={opts.voice} onChange={set("voice")}>
+              {VOICES.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
+            </select>
+          </Labeled>
+          <Labeled label="Wording that must stay exact" wide><textarea className="field" rows={2} value={opts.exactWording} onChange={set("exactWording")} /></Labeled>
+          <Labeled label="Ending or call to action" wide><input className="field" placeholder="e.g. Follow for more" value={opts.cta} onChange={set("cta")} /></Labeled>
         </div>
       </Disclosure>
 

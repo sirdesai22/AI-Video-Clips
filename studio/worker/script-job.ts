@@ -32,7 +32,7 @@ export function buildScriptPrompt(v: Video, previous: Script | null, note: strin
   });
 }
 
-export async function runScriptJob(job: Job): Promise<void> {
+export async function runScriptJob(job: Job, opts: { timeoutMs?: number } = {}): Promise<void> {
   const v = getVideo(job.videoId);
   if (!v) return;
   const { note } = job.payload as ScriptPayload;
@@ -48,12 +48,16 @@ export async function runScriptJob(job: Job): Promise<void> {
       prompt: buildScriptPrompt(v, previous, note ?? null, errors),
       args: ["--output-format", "json", "--json-schema", JSON.stringify(scriptJsonSchema),
         "--allowedTools", "WebFetch,WebSearch", ...modelArgs()],
-      timeoutMs: SCRIPT_TIMEOUT_MS,
+      timeoutMs: opts.timeoutMs ?? SCRIPT_TIMEOUT_MS,
     });
     if (r.timedOut) { errors = ["timed out"]; break; }
     let parsed: Record<string, unknown> | null = null;
     try { parsed = JSON.parse(r.stdout.trim().split("\n").pop() ?? ""); } catch { parsed = null; }
-    if (!parsed) { errors = [`no output (${r.stderr.slice(0, 300) || `exit ${r.code}`})`]; continue; }
+    if (!parsed) {
+      errors = [`no output (${r.stderr.slice(0, 300) || `exit ${r.code}`})`];
+      addEvent(v.id, "log", `script attempt ${attempt + 1} gave no parseable output`);
+      continue;
+    }
     if (parsed.is_error) { errors = [String(parsed.result ?? "agent error")]; break; }
     const check = validateScript(extractScript(parsed), v.format);
     if (check.ok) {

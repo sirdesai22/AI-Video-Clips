@@ -4,5 +4,5 @@ import { promptsDir } from "./paths";
 
 export function renderPrompt(name: string, vars: Record<string, string>): string {
   const raw = fs.readFileSync(path.join(promptsDir(), `${name}.md`), "utf8");
-  return raw.replace(/\{\{(\w+)\}\}/g, (m, k: string) => (k in vars ? vars[k] : m));
+  return raw.replace(/\{\{(\w+)\}\}/g, (m, k: string) => (Object.hasOwn(vars, k) ? vars[k] : m));
 }

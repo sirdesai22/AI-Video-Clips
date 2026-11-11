@@ -21,6 +21,13 @@ if (process.env.FAKE_FAIL === "1") {
 
 if (args.includes("--json-schema")) {
   const script = JSON.parse(fs.readFileSync(path.join(here, "script.json"), "utf8"));
+  if (process.env.FAKE_GARBAGE === "1") { console.log("not json"); process.exit(0); }
+  const marker = path.join(process.cwd(), ".fake-invalid-once");
+  const mode = process.env.FAKE_INVALID;
+  if (mode === "always" || (mode === "once" && !fs.existsSync(marker))) {
+    if (mode === "once") fs.writeFileSync(marker, "1");
+    script.scenes[0].spoken = Array.from({ length: 25 }, (_, i) => `w${i}`).join(" ");
+  }
   if (prompt.includes("REWRITE NOTE")) script.title = script.title + " (rewritten)";
   console.log(JSON.stringify({ type: "result", subtype: "success", is_error: false, session_id: "fake-session", result: JSON.stringify(script), structured_output: script }));
   process.exit(0);

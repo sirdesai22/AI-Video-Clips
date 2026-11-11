@@ -10,7 +10,7 @@ beforeEach(() => {
   process.env.AGENT = "fake";
   process.env.VIDEOS_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "rs-videos-"));
 });
-afterEach(() => { delete process.env.AGENT; delete process.env.FAKE_FAIL; });
+afterEach(() => { delete process.env.AGENT; for (const k of ["FAKE_FAIL", "FAKE_INVALID", "FAKE_GARBAGE", "FAKE_HANG"]) delete process.env[k]; });
 
 function newVideo() {
   const v = db.createVideo({ format: "reel", input: "https://www.highagency.com/", options: { tone: "bold" } });
@@ -60,5 +60,40 @@ describe("runScriptJob", () => {
     const after = db.getVideo(v.id)!;
     expect(after.status).toBe("script_failed");
     expect(after.error).toMatch(/fake failure/);
+  });
+
+  it("retries once after an invalid script and then succeeds", async () => {
+    process.env.FAKE_INVALID = "once";
+    const v = newVideo();
+    await runScriptJob(db.enqueueJob(v.id, "script", {}));
+    const after = db.getVideo(v.id)!;
+    expect(after.status).toBe("script_ready");
+    expect(after.scriptVersion).toBe(1);
+    expect(db.listEvents(v.id).some((e) => e.text.includes("attempt 1 invalid"))).toBe(true);
+  });
+
+  it("fails when the script stays invalid", async () => {
+    process.env.FAKE_INVALID = "always";
+    const v = newVideo();
+    await runScriptJob(db.enqueueJob(v.id, "script", {}));
+    const after = db.getVideo(v.id)!;
+    expect(after.status).toBe("script_failed");
+    expect(after.error).toContain("scenes.0.spoken");
+  });
+
+  it("fails on unparseable output", async () => {
+    process.env.FAKE_GARBAGE = "1";
+    const v = newVideo();
+    await runScriptJob(db.enqueueJob(v.id, "script", {}));
+    expect(db.getVideo(v.id)!.status).toBe("script_failed");
+  });
+
+  it("fails on timeout", async () => {
+    process.env.FAKE_HANG = "1";
+    const v = newVideo();
+    await runScriptJob(db.enqueueJob(v.id, "script", {}), { timeoutMs: 500 });
+    const after = db.getVideo(v.id)!;
+    expect(after.status).toBe("script_failed");
+    expect(after.error).toContain("timed out");
   });
 });

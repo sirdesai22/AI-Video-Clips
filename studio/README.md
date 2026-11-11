@@ -1,36 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reel Studio
 
-## Getting Started
+Turn links, a story or a topic into a finished Reel (9:16) or Explainer (16:9). Runs on this Mac and opens in your browser at http://localhost:3000.
 
-First, run the development server:
+## First time
+1. `cd studio && npm install && npm run setup`
+2. Make sure Claude Code works headless: run `claude` once in a terminal and use `/login` if asked. Check it with `claude -p "Reply with OK." < /dev/null`.
+3. For music (optional): `npx hyperframes auth login` (free HeyGen account).
+4. `npm run build && npm start`
+5. Open http://localhost:3000
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Day to day
+`npm start` runs the web app and the worker. Finished videos are in `studio/videos/<id>/project/renders/`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Develop
+- `npm run dev:all`: dev server and worker, with reload
+- `AGENT=fake npm run dev:all`: no Claude calls; replays a recorded run
+- `npm test`: unit tests
+- `npm run e2e`: end-to-end tests

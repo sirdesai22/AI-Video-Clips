@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import * as db from "../../lib/db";
+import { recipeText } from "../../lib/recipes";
 import { runScriptJob, buildScriptPrompt } from "../../worker/script-job";
 
 beforeEach(() => {
@@ -22,13 +23,43 @@ describe("buildScriptPrompt", () => {
     const v = newVideo();
     const p = buildScriptPrompt(v, { title: "Old" } as never, "punchier", ["scenes.0.spoken: 20 words, max 19"]);
     expect(p).toContain("Vertical 9:16 reel");
-    expect(p).toContain("tone: bold");
+    expect(p).toContain("168 px and 1330 px");
+    expect(p).toContain('tone: "bold" (owner\'s choice, BINDING)');
     expect(p).toContain("https://www.highagency.com/");
     expect(p).toContain("REWRITE NOTE: punchier");
     expect(p).toContain("\"title\": \"Old\"");
     expect(p).toContain("scenes.0.spoken: 20 words, max 19");
     expect(p).toContain("\"am_michael\"");
     expect(p).toContain("do not invoke any skills");
+    expect(p).not.toMatch(/\{\{\w+\}\}/);
+  });
+
+  it("composes the recipe's script rules and marks owner knobs binding", () => {
+    const v = db.createVideo({
+      format: "landscape", recipe: "data-story", input: "numbers",
+      options: { angle: "trend", palette: "forest green and brass", length: "about 30 s" },
+    });
+    const p = buildScriptPrompt(v, null, null, []);
+    expect(p).toContain("Landscape 16:9");
+    expect(p).toContain(recipeText("data-story", "script").trim());
+    expect(p).toContain("Video type: Data story");
+    expect(p).toContain("Scenes: 2–8");
+    expect(p).toContain('angle: "trend" (owner\'s choice, BINDING');
+    expect(p).toContain('palette: "forest green and brass" (owner\'s choice, BINDING');
+    expect(p).toContain('length: "about 30 s" (owner\'s choice, BINDING');
+    expect(p).toContain("voiceTone: not set");
+    expect(p).toContain("musicMood: not set");
+    expect(p).toContain("exactly one of one-number, trend, comparison, ranking");
+    expect(p).toContain("conversational");
+  });
+
+  it("tells a motion graphic that spoken lines are empty and lists only its knobs", () => {
+    const v = db.createVideo({ format: "reel", recipe: "motion-graphic", input: "ARR $4.2M", options: { voiceTone: "ignored" } });
+    const p = buildScriptPrompt(v, null, null, []);
+    expect(p).toContain('`spoken`: exactly "" (empty)');
+    expect(p).toContain("No narration");
+    expect(p).toContain("angle: not set; pick the one the material fits from kinetic-title");
+    expect(p).not.toContain("- voiceTone:");
   });
 });
 

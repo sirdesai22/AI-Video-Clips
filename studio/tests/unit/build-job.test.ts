@@ -4,7 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import * as db from "../../lib/db";
 import { projectDir, rendersDir } from "../../lib/paths";
-import { runBuildJob, prepareProject, ALLOWED_TOOLS } from "../../worker/build-job";
+import { RECIPE_IDS, recipeText } from "../../lib/recipes";
+import { runBuildJob, prepareProject, buildPrompt, ALLOWED_TOOLS } from "../../worker/build-job";
 
 const script = JSON.parse(fs.readFileSync(path.join(__dirname, "../fixtures/script.json"), "utf8"));
 let tmp: string;
@@ -46,6 +47,89 @@ describe("prepareProject", () => {
     expect(brief).toContain("1080x1920");
     expect(brief).toContain("am_michael");
     expect(brief).toContain("renders/v1.mp4");
+    expect(brief).toContain("- `references/types/vertical.md`");
+    expect(brief).toContain("`references/types/explainer.md`");
+    expect(brief).toContain("A burned-in caption track");
+    expect(brief).toContain("about −18 dB under the voice");
+    expect(brief).toContain("No owner palette: the look is binding");
+    expect(brief).toContain("text over a dimmed screenshot");
+    expect(brief).toContain("End on a settled frame");
+    expect(brief).toContain("the hand sweeps to 59 and the frame lifts off");
+    expect(brief).toContain(recipeText("explainer", "build").trim());
+    expect(brief).not.toMatch(/\{\{\w+\}\}/);
+  });
+
+  it("writes a motion-graphic brief with no narration and the look hexes", async () => {
+    const v = db.createVideo({ format: "landscape", recipe: "motion-graphic", input: "ARR", options: {} });
+    const silent = { ...script, scenes: script.scenes.map((s: object) => ({ ...s, spoken: "" })) };
+    const brief = fs.readFileSync(path.join(await prepareProject(v, silent), "BRIEF.md"), "utf8");
+    expect(brief).toContain("1920x1080");
+    expect(brief).toContain("No narration");
+    expect(brief).toContain("`skipped (no narration)`");
+    expect(brief).not.toContain("hyperframes tts");
+    expect(brief).toContain("there is no narration, so no caption track");
+    expect(brief).toContain("the music and the effects carry the piece");
+    for (const hex of ["#F4EFE6", "#1B1B1F", "#D9481C"]) expect(brief).toContain(hex);
+    expect(brief).not.toContain("- `references/types/vertical.md`");
+  });
+
+  it("writes a product-launch brief that captures the product URL", async () => {
+    const v = db.createVideo({ format: "landscape", recipe: "product-launch", input: "https://example.com/app, new export. Try it free", options: {} });
+    const brief = fs.readFileSync(path.join(await prepareProject(v, script), "BRIEF.md"), "utf8");
+    expect(brief).toContain("`npx hyperframes capture https://example.com/app --json`");
+    expect(brief).toContain("the captured brand tokens win when they differ");
+  });
+
+  it("makes an owner palette binding, even over captured brand colours", async () => {
+    const v = db.createVideo({ format: "landscape", recipe: "product-launch", input: "https://example.com", options: { palette: "black and lime" } });
+    const brief = fs.readFileSync(path.join(await prepareProject(v, script), "BRIEF.md"), "utf8");
+    expect(brief).toContain('The owner set the palette ("black and lime")');
+    expect(brief).not.toContain("captured brand tokens win");
+  });
+
+  it("tells a PR build to fetch nothing", async () => {
+    const v = db.createVideo({ format: "landscape", recipe: "pr-video", input: "https://github.com/o/r/pull/1", options: {} });
+    const brief = fs.readFileSync(path.join(await prepareProject(v, script), "BRIEF.md"), "utf8");
+    expect(brief).toContain("Fetch nothing");
+    expect(brief).not.toContain("hyperframes capture");
+  });
+});
+
+describe("buildPrompt", () => {
+  it("restores the design and review passes", () => {
+    const v = readyVideo();
+    const p = buildPrompt(v, script, "renders/v1.mp4");
+    expect(p).toContain("STORYLINES.md");
+    expect(p).toContain("SPEC.md");
+    expect(p).toContain("`npx hyperframes check --json`");
+    expect(p).toContain("`npx hyperframes snapshot --review`");
+    expect(p).toContain("REVIEW.md");
+    expect(p).toContain("plus the caption track");
+    expect(p).toContain("Kokoro lines");
+    for (const s of ["voice", "music", "look", "scenes", "check", "render"]) expect(p).toContain(`STAGE: ${s}`);
+    expect(p).not.toMatch(/\{\{\w+\}\}/);
+  });
+
+  it("skips the voice stage and captions without narration", () => {
+    const v = db.createVideo({ format: "reel", recipe: "motion-graphic", input: "x", options: {} });
+    const p = buildPrompt(v, script, "renders/v1.mp4");
+    expect(p).toContain("`skipped (no narration)`");
+    expect(p).not.toContain("Kokoro");
+    expect(p).not.toContain("caption track");
+  });
+
+  it("only names commands on the build allowlist, in the prompt and every recipe's brief", async () => {
+    const texts = [buildPrompt(readyVideo(), script, "renders/v1.mp4")];
+    for (const recipe of RECIPE_IDS) {
+      for (const format of ["reel", "landscape"] as const) {
+        const v = db.createVideo({ format, recipe, input: "https://example.com", options: {} });
+        texts.push(fs.readFileSync(path.join(await prepareProject(v, script), "BRIEF.md"), "utf8"));
+      }
+    }
+    for (const t of texts) {
+      expect(t).not.toMatch(/`(git|gh|curl|wget|python3?|node|npm|bash|sh|ls|cat|mkdir|rm|cp|mv|open|sox)\s/);
+      for (const m of t.matchAll(/`npx (\S+)/g)) expect(m[1]).toBe("hyperframes");
+    }
   });
 });
 

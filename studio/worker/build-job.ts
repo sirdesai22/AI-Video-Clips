@@ -5,11 +5,12 @@ import { promisify } from "node:util";
 import { addEvent, addRender, getScript, getVideo, updateVideo } from "../lib/db";
 import { kokoroPython, rendersDir } from "../lib/paths";
 import { renderPrompt } from "../lib/prompts";
+import { getRecipe } from "../lib/recipes";
 import { parseStreamLine, progressAtStart, stageIndex, type StageName } from "../lib/stages";
 import type { Script } from "../lib/script-schema";
 import type { BuildPayload, Job, Video } from "../lib/types";
 import { modelArgs, runClaude } from "./claude";
-import { prepareProject as prepareProjectRaw } from "./project";
+import { captionsOn, prepareProject as prepareProjectRaw } from "./project";
 
 const run = promisify(execFile);
 export const BUILD_TIMEOUT_MS = 45 * 60 * 1000;
@@ -19,6 +20,18 @@ export const ALLOWED_TOOLS =
 /** Prepares the project so the next render lands at renders/v<renderVersion+1>.mp4. */
 export async function prepareProject(v: Video, script: Script): Promise<string> {
   return prepareProjectRaw(v, script, `renders/v${v.renderVersion + 1}.mp4`);
+}
+
+/** The first-build prompt: prompts/build.md with the voice and caption stages set by the recipe and format. */
+export function buildPrompt(v: Video, script: Script, renderRel: string): string {
+  const recipe = getRecipe(v.recipe);
+  return renderPrompt("build", {
+    renderPath: renderRel,
+    voiceStage: recipe.narration
+      ? "Kokoro lines per BRIEF.md, one file per scene, each measured with ffprobe."
+      : "print the line `STAGE: voice`, then `skipped (no narration)`, and move on: there is no TTS for this video.",
+    captionsStage: captionsOn(v, recipe, script) ? ", plus the caption track" : "",
+  });
 }
 
 export async function finalizeRender(videoId: string, renderPath: string): Promise<boolean> {
@@ -68,10 +81,7 @@ export async function runBuildJob(job: Job, opts: { timeoutMs?: number } = {}): 
     ? renderPrompt("revise", { request: payload.request ?? "", renderPath: renderRel })
     : payload.mode === "retry" && resume
       ? renderPrompt("retry", { reason: v.error ?? "it was interrupted", renderPath: renderRel })
-      : renderPrompt("build", {
-          renderPath: renderRel,
-          captionsStage: v.format === "reel" ? ", plus the caption track" : "",
-        });
+      : buildPrompt(v, row.script as Script, renderRel);
 
   let current = -1;
   let resultError: string | null = null;

@@ -1,32 +1,101 @@
 import fs from "node:fs";
 import { addEvent, addScript, getScript, getVideo, updateVideo } from "../lib/db";
-import { getRecipe } from "../lib/recipes";
+import { getRecipe, recipeText, type Recipe } from "../lib/recipes";
 import { renderPrompt } from "../lib/prompts";
 import { videoDir } from "../lib/paths";
-import { extractScript, scriptJsonSchema, validateScript, type Script } from "../lib/script-schema";
+import { extractScript, scriptJsonSchema, SPOKEN_MAX_WORDS, validateScript, type Script } from "../lib/script-schema";
 import type { Job, ScriptPayload, Video } from "../lib/types";
 import { modelArgs, runClaude } from "./claude";
 
 export const SCRIPT_TIMEOUT_MS = 5 * 60 * 1000;
 const DEFAULT_VOICE = "am_michael";
 
-export function buildScriptPrompt(v: Video, previous: Script | null, note: string | null, errors: string[]): string {
+/** One line per knob: the owner's value marked binding, or what the writer decides when unset. */
+export function knobLines(v: Video, recipe: Recipe): string {
   const o = v.options;
-  const options = [
-    o.tone && `tone: ${o.tone}`,
-    o.length && `target length: ${o.length}`,
-    o.audience && `audience: ${o.audience}`,
-    o.exactWording && `keep this wording exactly: ${o.exactWording}`,
-    o.cta && `end with: ${o.cta}`,
-  ].filter(Boolean).join("\n") || "none";
+  const q = (s: string) => JSON.stringify(s.trim());
+  const set = (s?: string): s is string => !!s && s.trim() !== "";
+  const lines: string[] = [];
+  if (set(o.tone)) lines.push(`- tone: ${q(o.tone)} (owner's choice, BINDING)`);
+  for (const k of recipe.knobs) {
+    const val = o[k];
+    switch (k) {
+      case "angle":
+        if (!recipe.angles.length) break;
+        lines.push(set(val)
+          ? `- angle: ${q(val)} (owner's choice, BINDING: set \`angle\` to exactly this and use its shape)`
+          : `- angle: not set; pick the one the material fits from ${recipe.angles.join(", ")}`);
+        break;
+      case "palette":
+        lines.push(set(val)
+          ? `- palette: ${q(val)} (owner's choice, BINDING: \`look.ground\`, \`look.ink\` and \`look.accent\` realise exactly this)`
+          : "- palette: not set; propose `look` from the subject's own world per the type's rules");
+        break;
+      case "voiceTone":
+        lines.push(set(val)
+          ? `- voiceTone: ${q(val)} (owner's choice, BINDING: \`look.voiceTone\` says this)`
+          : "- voiceTone: not set; propose `look.voiceTone`");
+        break;
+      case "musicMood":
+        lines.push(set(val)
+          ? `- musicMood: ${q(val)} (owner's choice, BINDING: \`look.musicMood\` says this, with a tempo and level)`
+          : "- musicMood: not set; propose `look.musicMood`");
+        break;
+      case "length":
+        lines.push(set(val)
+          ? `- length: ${q(val)} (owner's choice, BINDING: size the scenes so \`estSeconds\` lands in it)`
+          : `- length: not set; aim for ${recipe.duration[v.format]}`);
+        break;
+      case "audience":
+        lines.push(set(val)
+          ? `- audience: ${q(val)} (owner's choice, BINDING: write for them)`
+          : "- audience: not set; infer it from the input");
+        break;
+      case "exactWording":
+        if (set(val)) lines.push(`- exact wording: ${q(val)} (owner's choice, BINDING: verbatim, unchanged, where the type's rules say)`);
+        break;
+      case "cta":
+        if (set(val)) lines.push(`- call to action: ${q(val)} (owner's choice, BINDING: quoted exactly in the final scene's \`onScreen\`)`);
+        break;
+      case "voice":
+        break; // the `voice` field carries it
+    }
+  }
+  return lines.join("\n") || "none";
+}
+
+export function buildScriptPrompt(v: Video, previous: Script | null, note: string | null, errors: string[]): string {
+  const recipe = getRecipe(v.recipe);
   const prev = previous
-    ? `## Previous version\n${JSON.stringify(previous, null, 2)}\n\nREWRITE NOTE: ${note ?? "make it better"}\nKeep what works; change what the note asks.`
+    ? `## Previous version\n${JSON.stringify(previous, null, 2)}\n\nREWRITE NOTE: ${note ?? "make it better"}\nKeep what works; change what the note asks.\n\n`
     : "";
-  const errs = errors.length ? `## Fix these problems from your last attempt\n${errors.map((e) => `- ${e}`).join("\n")}` : "";
+  const errs = errors.length ? `## Fix these problems from your last attempt\n${errors.map((e) => `- ${e}`).join("\n")}\n\n` : "";
+  const spokenRule = recipe.narration
+    ? `   - \`spoken\`: what the narrator says, at most ${SPOKEN_MAX_WORDS} words, conversational, written as short phrases the picture can land on.`
+    : '   - `spoken`: exactly "" (empty). This type has no narrator.';
+  const estRule = recipe.narration
+    ? "   - `estSeconds`: about 0.4 s per spoken word plus 0.6 s."
+    : "   - `estSeconds`: the exact length of the beat in seconds, not a word count.";
   return renderPrompt("script", {
-    formatRules: renderPrompt(v.format === "reel" ? "reel-rules" : "explainer-rules" /* Task 3 renames to landscape-rules */, {}),
-    voice: o.voice || DEFAULT_VOICE,
-    options,
+    recipeLabel: recipe.label,
+    duration: recipe.duration[v.format],
+    scenesMin: String(recipe.scenes.min),
+    scenesMax: String(recipe.scenes.max),
+    narrationLine: recipe.narration
+      ? "Narrated: every scene has a spoken line."
+      : 'No narration: every `spoken` is "" and the words on screen carry it.',
+    formatRules: renderPrompt(v.format === "reel" ? "reel-rules" : "landscape-rules", {}).trim(),
+    spokenRule,
+    estRule,
+    onScreenRule: recipe.narration
+      ? ", and NEVER the same as `spoken` (show the number, the keyword or the punchline)."
+      : "; it is every word the viewer reads.",
+    voice: v.options.voice || DEFAULT_VOICE,
+    angleRule: recipe.angles.length
+      ? `exactly one of ${recipe.angles.join(", ")}.`
+      : '"" (empty): this type has no angles.',
+    recipeRules: recipeText(recipe.id, "script").trim(),
+    knobs: knobLines(v, recipe),
     previous: prev,
     errors: errs,
     input: v.input,

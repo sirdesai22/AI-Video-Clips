@@ -12,7 +12,7 @@
 - Facts on screen must match SCRIPT.json: add no number, round none differently, derive no new claim.
 {{sourceRule}}
 
-## Read before STAGE: look
+## Read before STAGE: voice
 The hyperframes skill is in `.claude/skills/hyperframes/`. Read these from it:
 {{readList}}
 
@@ -24,6 +24,7 @@ The hyperframes skill is in `.claude/skills/hyperframes/`. Read these from it:
 - SPEC.md's LOOK line uses these hexes. Turn the type direction into a face, weight, px size and tracking (bundled faces, or `@font-face` to a file in `assets/fonts/`), and the look into the rules of one medium with numbers (grain %, shadow offset/blur/opacity, stroke width). The accent is rationed: the keyword, the payoff, the last line.
 
 ## Concept (the recommended storyline)
+- Storylines: {{storylines}}
 - device: {{device}} · form: {{form}}
 - Spectacle beat: {{spectacle}}. It happens once, at its scene, at full speed; give it its own frame range in SPEC.md's SHOTS. Everything else stays restrained so it lands.
 

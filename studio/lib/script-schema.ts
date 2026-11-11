@@ -12,6 +12,9 @@ export const SceneSchema = z.object({
   block: z.string().optional(),
 });
 
+/** A Kokoro voice id such as "am_michael". */
+export const VOICE_RE = /^[a-z]{2}_[a-z0-9]+$/;
+
 const Hex = z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "must be a hex colour like #1D5AA6");
 
 export const LookSchema = z.object({
@@ -34,7 +37,7 @@ export const ScriptSchema = z.object({
   title: z.string().min(1),
   idea: z.string().min(1),
   angle: z.string(),
-  voice: z.string().min(1),
+  voice: z.string().regex(VOICE_RE, "must be a Kokoro voice id like am_michael"),
   look: LookSchema,
   concept: ConceptSchema,
   estSeconds: z.number().positive(),
@@ -104,7 +107,7 @@ export const scriptJsonSchema = {
     title: { type: "string" },
     idea: { type: "string" },
     angle: { type: "string" },
-    voice: { type: "string" },
+    voice: { type: "string", pattern: "^[a-z]{2}_[a-z0-9]+$" },
     look: {
       type: "object",
       additionalProperties: false,

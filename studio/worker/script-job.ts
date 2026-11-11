@@ -3,7 +3,7 @@ import { addEvent, addScript, getScript, getVideo, updateVideo } from "../lib/db
 import { getRecipe, recipeText, type Recipe } from "../lib/recipes";
 import { renderPrompt } from "../lib/prompts";
 import { videoDir } from "../lib/paths";
-import { extractScript, scriptJsonSchema, SPOKEN_MAX_WORDS, validateScript, type Script } from "../lib/script-schema";
+import { extractScript, scriptJsonSchema, SPOKEN_MAX_WORDS, validateScript, VOICE_RE, type Script } from "../lib/script-schema";
 import type { Job, ScriptPayload, Video } from "../lib/types";
 import { modelArgs, runClaude } from "./claude";
 
@@ -64,6 +64,24 @@ export function knobLines(v: Video, recipe: Recipe): string {
   return lines.join("\n") || "none";
 }
 
+/** Kokoro voices the writer may pick from when the owner did not choose one. */
+export const KOKORO_VOICES = [
+  "am_michael (US male, calm)", "am_adam (US male)", "af_heart (US female, warm)", "af_nova (US female)",
+  "af_sky (US female, bright)", "bm_george (UK male)", "bf_emma (UK female)", "bf_isabella (UK female)",
+];
+
+/** The `voice` instruction: the owner's voice binds the tone; otherwise the writer picks the id that matches the tone. */
+export function voiceRule(v: Video, recipe: Recipe): string {
+  const owner = v.options.voice?.trim();
+  if (!recipe.narration) return `use "${owner && VOICE_RE.test(owner) ? owner : DEFAULT_VOICE}" (unused: no narration).`;
+  if (owner && VOICE_RE.test(owner)) {
+    const sex = owner[1] === "f" ? "female" : owner[1] === "m" ? "male" : null;
+    return `use "${owner}" (owner's choice, BINDING).` +
+      (sex ? ` \`look.voiceTone\` must fit it: a ${sex} voice.` : " `look.voiceTone` must fit it.");
+  }
+  return `pick the Kokoro id that matches \`look.voiceTone\` (same sex and accent), from: ${KOKORO_VOICES.join(", ")}. Default "${DEFAULT_VOICE}".`;
+}
+
 export function buildScriptPrompt(v: Video, previous: Script | null, note: string | null, errors: string[]): string {
   const recipe = getRecipe(v.recipe);
   const prev = previous
@@ -90,7 +108,7 @@ export function buildScriptPrompt(v: Video, previous: Script | null, note: strin
     onScreenRule: recipe.narration
       ? ", and NEVER the same as `spoken` (show the number, the keyword or the punchline)."
       : "; it is every word the viewer reads.",
-    voice: v.options.voice || DEFAULT_VOICE,
+    voiceRule: voiceRule(v, recipe),
     angleRule: recipe.angles.length
       ? `exactly one of ${recipe.angles.join(", ")}.`
       : '"" (empty): this type has no angles.',

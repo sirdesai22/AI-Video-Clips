@@ -53,6 +53,18 @@ describe("buildScriptPrompt", () => {
     expect(p).toContain("conversational");
   });
 
+  it("binds the tone to the owner's voice, or lets the writer pick a voice that fits the tone", () => {
+    const owned = db.createVideo({ format: "reel", recipe: "explainer", input: "x", options: { voice: "bf_emma" } });
+    const p = buildScriptPrompt(owned, null, null, []);
+    expect(p).toContain('use "bf_emma" (owner\'s choice, BINDING). `look.voiceTone` must fit it: a female voice.');
+    const open = db.createVideo({ format: "reel", recipe: "explainer", input: "x", options: {} });
+    const q = buildScriptPrompt(open, null, null, []);
+    expect(q).toContain("pick the Kokoro id that matches `look.voiceTone`");
+    for (const id of ["am_michael", "am_adam", "af_heart", "af_nova", "af_sky", "bm_george", "bf_emma", "bf_isabella"]) {
+      expect(q).toContain(id);
+    }
+  });
+
   it("tells a motion graphic that spoken lines are empty and lists only its knobs", () => {
     const v = db.createVideo({ format: "reel", recipe: "motion-graphic", input: "ARR $4.2M", options: { voiceTone: "ignored" } });
     const p = buildScriptPrompt(v, null, null, []);

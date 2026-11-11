@@ -25,6 +25,19 @@ describe("validateScript", () => {
     if (!r.ok) expect(r.errors.join()).toMatch(/scenes\.0\.spoken: 20 words, max 19/);
   });
 
+  it("rejects a voice that is not a Kokoro id", () => {
+    for (const voice of ["Michael", "am michael", "am_michael; rm -rf /", ""]) {
+      const s = clone();
+      s.voice = voice;
+      const r = validateScript(s, "reel");
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.errors.join()).toMatch(/^voice:/);
+    }
+    const s = clone();
+    s.voice = "bf_isabella";
+    expect(validateScript(s, "reel").ok).toBe(true);
+  });
+
   it("limits on-screen words by format", () => {
     const s = clone();
     s.scenes[1].onScreen = "one two three four five six seven";

@@ -11,6 +11,8 @@ export default function ScriptReview({ detail, onChange }: { detail: VideoDetail
   const [note, setNote] = useState("");
   const [askNote, setAskNote] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [heygenWarn, setHeygenWarn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   if (!current) return null;
   const s = editing && draft ? draft : current.script;
@@ -33,11 +35,32 @@ export default function ScriptReview({ detail, onChange }: { detail: VideoDetail
     }
   }
 
-  async function approve() {
+  async function approve(skipCheck = false) {
+    if (!skipCheck) {
+      setChecking(true);
+      try {
+        const st = await fetch("/api/settings").then((r) => r.json()).catch(() => ({ heygen: "unknown" }));
+        if (st.heygen === "signed_out") { setHeygenWarn(true); return; }
+      } finally {
+        setChecking(false);
+      }
+    }
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
       void Notification.requestPermission();
     }
+    setHeygenWarn(false);
     await act({ action: "approve" });
+  }
+
+  async function recheckAndApprove() {
+    setChecking(true);
+    try {
+      const st = await fetch("/api/settings?recheck=1").then((r) => r.json()).catch(() => ({ heygen: "unknown" }));
+      if (st.heygen === "signed_out") return;
+    } finally {
+      setChecking(false);
+    }
+    await approve(true);
   }
 
   const updateScene = (i: number, k: "spoken" | "onScreen", val: string) =>
@@ -114,6 +137,15 @@ export default function ScriptReview({ detail, onChange }: { detail: VideoDetail
           </button>
         </div>
       )}
+      {heygenWarn && (
+        <div className="card flex flex-col gap-3 border-warn">
+          <p className="text-sm">You&apos;re not signed in to HeyGen, so this video won&apos;t have music. In a terminal, run <code>npx hyperframes auth login</code>.</p>
+          <div className="flex gap-3">
+            <button className="btn-secondary" disabled={busy || checking} onClick={() => approve(true)}>Build without music</button>
+            <button className="btn-secondary" disabled={busy || checking} onClick={recheckAndApprove}>{checking ? "Checking…" : "I\'ve signed in"}</button>
+          </div>
+        </div>
+      )}
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
 
       <BottomBar>
@@ -127,7 +159,7 @@ export default function ScriptReview({ detail, onChange }: { detail: VideoDetail
           </>
         ) : (
           <>
-            <button className="btn-primary" disabled={busy} onClick={approve}>Approve & make video</button>
+            <button className="btn-primary" disabled={busy || checking} onClick={() => approve()}>{checking ? "Checking…" : "Approve & make video"}</button>
             <button className="btn-secondary" onClick={() => { setDraft(structuredClone(current.script)); setEditing(true); }}>Edit</button>
             <button className="btn-secondary" onClick={() => setAskNote((x) => !x)}>Rewrite</button>
           </>

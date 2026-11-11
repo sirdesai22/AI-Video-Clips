@@ -3,6 +3,14 @@
   "idea": "Agency is a skill: two bike mechanics proved it by flying.",
   "angle": "story",
   "voice": "am_michael",
+  "look": {
+    "ground": "#F4EFE6", "ink": "#1B1B1F", "accent": "#D9481C",
+    "type": "condensed bold sans, 9% frame height titles",
+    "captionStyle": "bold",
+    "voiceTone": "calm male, unhurried",
+    "musicMood": "low pulsing synth under -18 dB"
+  },
+  "concept": { "device": "stopwatch", "form": "one continuous take", "spectacle": "the hand sweeps to 59 and the frame lifts off" },
   "estSeconds": 30,
   "scenes": [
     { "spoken": "Fifty-nine seconds. That's how long the first real flight lasted.", "onScreen": "0:59 in the air", "visual": "Stopwatch hand sweeps to 59", "estSeconds": 4 },

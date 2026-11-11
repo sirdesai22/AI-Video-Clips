@@ -82,7 +82,7 @@ export default function SettingsForm() {
       <Labeled label="Default format">
         <select className="field" value={form.defaultFormat} onChange={set("defaultFormat")}>
           <option value="reel">Reel (9:16)</option>
-          <option value="explainer">Explainer (16:9)</option>
+          <option value="landscape">Landscape (16:9)</option>
         </select>
       </Labeled>
       <Labeled label="Default voice">

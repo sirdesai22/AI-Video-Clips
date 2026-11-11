@@ -1,4 +1,4 @@
-export type Format = "reel" | "explainer";
+export type Format = "reel" | "landscape";
 export type RecipeId = "explainer" | "product-launch" | "motion-graphic" | "data-story" | "pr-video" | "custom";
 export type VideoStatus =
   | "scripting" | "script_ready" | "script_failed"
@@ -14,11 +14,16 @@ export interface VideoOptions {
   voice?: string;
   exactWording?: string;
   cta?: string;
+  angle?: string;
+  palette?: string;
+  voiceTone?: string;
+  musicMood?: string;
 }
 
 export interface Video {
   id: string;
   format: Format;
+  recipe: RecipeId;
   input: string;
   options: VideoOptions;
   title: string | null;

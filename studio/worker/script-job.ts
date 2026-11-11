@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { addEvent, addScript, getScript, getVideo, updateVideo } from "../lib/db";
+import { getRecipe } from "../lib/recipes";
 import { renderPrompt } from "../lib/prompts";
 import { videoDir } from "../lib/paths";
 import { extractScript, scriptJsonSchema, validateScript, type Script } from "../lib/script-schema";
@@ -23,7 +24,7 @@ export function buildScriptPrompt(v: Video, previous: Script | null, note: strin
     : "";
   const errs = errors.length ? `## Fix these problems from your last attempt\n${errors.map((e) => `- ${e}`).join("\n")}` : "";
   return renderPrompt("script", {
-    formatRules: renderPrompt(v.format === "reel" ? "reel-rules" : "explainer-rules", {}),
+    formatRules: renderPrompt(v.format === "reel" ? "reel-rules" : "explainer-rules" /* Task 3 renames to landscape-rules */, {}),
     voice: o.voice || DEFAULT_VOICE,
     options,
     previous: prev,
@@ -59,7 +60,7 @@ export async function runScriptJob(job: Job, opts: { timeoutMs?: number } = {}):
       continue;
     }
     if (parsed.is_error) { errors = [String(parsed.result ?? "agent error")]; break; }
-    const check = validateScript(extractScript(parsed), v.format);
+    const check = validateScript(extractScript(parsed), { format: v.format, recipe: getRecipe(v.recipe) });
     if (check.ok) {
       const version = addScript(v.id, check.script, note ?? null);
       updateVideo(v.id, { status: "script_ready", title: check.script.title, scriptVersion: version, error: null });

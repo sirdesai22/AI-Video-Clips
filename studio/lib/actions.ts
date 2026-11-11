@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   addScript, enqueueJob, getScript, getSetting, getVideo, listRenders, listScripts, updateVideo, createVideo,
 } from "./db";
+import { getRecipe, RECIPE_IDS } from "./recipes";
 import { validateScript, type Script } from "./script-schema";
 import type { Video } from "./types";
 
@@ -9,7 +10,8 @@ export type ActionResult = { ok: true; video: Video } | { ok: false; error: stri
 const fail = (error: string, status: number): ActionResult => ({ ok: false, error, status });
 
 const CreateSchema = z.object({
-  format: z.enum(["reel", "explainer"]).default("reel"),
+  format: z.enum(["reel", "landscape"]).default("reel"),
+  recipe: z.enum(RECIPE_IDS).default("explainer"),
   input: z.string().trim().min(3, "Add a link, story or topic").max(20000),
   options: z.object({
     tone: z.string().max(200).optional(),
@@ -18,6 +20,10 @@ const CreateSchema = z.object({
     voice: z.string().max(40).optional(),
     exactWording: z.string().max(2000).optional(),
     cta: z.string().max(300).optional(),
+    angle: z.string().max(100).optional(),
+    palette: z.string().max(200).optional(),
+    voiceTone: z.string().max(200).optional(),
+    musicMood: z.string().max(200).optional(),
   }).default({}),
 });
 
@@ -26,7 +32,7 @@ export function createVideoAction(body: unknown): ActionResult {
   if (!p.success) return fail(p.error.issues[0]?.message ?? "Invalid input", 400);
   const options = Object.fromEntries(Object.entries(p.data.options).filter(([, val]) => val && String(val).trim()));
   options.voice = options.voice || getSetting("default_voice") || "am_michael";
-  const video = createVideo({ format: p.data.format, input: p.data.input, options });
+  const video = createVideo({ format: p.data.format, recipe: p.data.recipe, input: p.data.input, options });
   enqueueJob(video.id, "script", {});
   return { ok: true, video };
 }
@@ -56,7 +62,7 @@ export function scriptAction(id: string, body: unknown): ActionResult {
       enqueueJob(v.id, "build", { mode: "new" });
       return { ok: true, video: updateVideo(v.id, { status: "queued", stage: null, progress: 0 }) };
     case "edit": {
-      const check = validateScript(a.script, v.format);
+      const check = validateScript(a.script, { format: v.format, recipe: getRecipe(v.recipe) });
       if (!check.ok) return fail(check.errors.join("; "), 422);
       const version = addScript(v.id, check.script, "edited");
       return { ok: true, video: updateVideo(v.id, { scriptVersion: version, title: check.script.title }) };

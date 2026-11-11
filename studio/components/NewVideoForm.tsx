@@ -14,8 +14,8 @@ const VOICES = [
 ];
 
 const FORMATS: { id: Format; title: string; sub: string }[] = [
-  { id: "reel", title: "Reel", sub: "9:16 · 20–45 s" },
-  { id: "explainer", title: "Explainer", sub: "16:9 · 45–90 s" },
+  { id: "reel", title: "Reel 9:16", sub: "9:16 · 20–45 s" },
+  { id: "landscape", title: "Landscape 16:9", sub: "16:9 · 45–90 s" },
 ];
 
 function Labeled({ label, wide, children }: { label: string; wide?: boolean; children: React.ReactNode }) {
@@ -37,7 +37,7 @@ export default function NewVideoForm() {
 
   useEffect(() => {
     fetch("/api/settings").then((r) => r.json()).then((s) => {
-      if (s.defaultFormat) setFormat(s.defaultFormat);
+      if (s.defaultFormat) setFormat(s.defaultFormat === "explainer" ? "landscape" : s.defaultFormat);
       if (s.defaultVoice) setOpts((o) => ({ ...o, voice: s.defaultVoice }));
     }).catch(() => {});
   }, []);

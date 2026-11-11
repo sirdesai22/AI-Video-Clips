@@ -4,7 +4,7 @@ import path from "node:path";
 import { customAlphabet } from "nanoid";
 import { dbPath } from "./paths";
 import type {
-  EventKind, Format, Job, JobKind, Render, ScriptRow, Video, VideoEvent, VideoOptions, VideoStatus,
+  EventKind, Format, Job, JobKind, RecipeId, Render, ScriptRow, Video, VideoEvent, VideoOptions, VideoStatus,
 } from "./types";
 
 const newId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 10);
@@ -39,6 +39,11 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS events_video ON events (video_id, id);
     CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
   `);
+  const cols = db.prepare(`PRAGMA table_info(videos)`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === "recipe")) {
+    db.exec(`ALTER TABLE videos ADD COLUMN recipe TEXT NOT NULL DEFAULT 'explainer'`);
+  }
+  db.exec(`UPDATE videos SET format = 'landscape' WHERE format = 'explainer'`);
   return db;
 }
 
@@ -53,6 +58,7 @@ function toVideo(r: Row): Video {
   return {
     id: r.id as string,
     format: r.format as Format,
+    recipe: r.recipe as RecipeId,
     input: r.input as string,
     options: JSON.parse(r.options as string) as VideoOptions,
     title: (r.title as string) ?? null,
@@ -80,13 +86,13 @@ function toJob(r: Row): Job {
   };
 }
 
-export function createVideo(v: { format: Format; input: string; options: VideoOptions }): Video {
+export function createVideo(v: { format: Format; recipe?: RecipeId; input: string; options: VideoOptions }): Video {
   const id = newId();
   const t = now();
   getDb()
-    .prepare(`INSERT INTO videos (id, format, input, options, status, created_at, updated_at)
-              VALUES (?, ?, ?, ?, 'scripting', ?, ?)`)
-    .run(id, v.format, v.input, JSON.stringify(v.options), t, t);
+    .prepare(`INSERT INTO videos (id, format, recipe, input, options, status, created_at, updated_at)
+              VALUES (?, ?, ?, ?, ?, 'scripting', ?, ?)`)
+    .run(id, v.format, v.recipe ?? "explainer", v.input, JSON.stringify(v.options), t, t);
   return getVideo(id)!;
 }
 

@@ -1,4 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import Database from "better-sqlite3";
 import * as db from "../../lib/db";
 
 beforeEach(() => db.closeDb());
@@ -15,6 +19,38 @@ describe("videos", () => {
     expect(u.title).toBe("T");
     expect(db.listVideos().map((x) => x.id)).toEqual([v.id]);
     expect(db.getVideo("nope")).toBeNull();
+  });
+});
+
+describe("recipe column and format migration", () => {
+  it("stores the recipe and defaults to explainer", () => {
+    expect(db.createVideo({ format: "reel", input: "x", options: {} }).recipe).toBe("explainer");
+    expect(db.createVideo({ format: "landscape", recipe: "data-story", input: "x", options: {} }).recipe).toBe("data-story");
+  });
+
+  it("adds the column to an old database and migrates explainer to landscape", () => {
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "old.db");
+    const old = new Database(f);
+    old.exec(`CREATE TABLE videos (
+      id TEXT PRIMARY KEY, format TEXT NOT NULL, input TEXT NOT NULL, options TEXT NOT NULL,
+      title TEXT, status TEXT NOT NULL, stage TEXT, progress INTEGER NOT NULL DEFAULT 0,
+      session_id TEXT, error TEXT, script_version INTEGER NOT NULL DEFAULT 0,
+      render_version INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+      INSERT INTO videos (id, format, input, options, status, created_at, updated_at)
+      VALUES ('old1', 'explainer', 'x', '{}', 'ready', 't', 't'), ('old2', 'reel', 'y', '{}', 'ready', 't', 't');`);
+    old.close();
+    const prev = process.env.DB_PATH;
+    process.env.DB_PATH = f;
+    try {
+      db.closeDb();
+      expect(db.getVideo("old1")).toMatchObject({ format: "landscape", recipe: "explainer" });
+      expect(db.getVideo("old2")?.format).toBe("reel");
+      db.closeDb();
+      expect(db.getVideo("old1")?.format).toBe("landscape"); // idempotent re-open
+    } finally {
+      db.closeDb();
+      if (prev === undefined) delete process.env.DB_PATH; else process.env.DB_PATH = prev;
+    }
   });
 });
 

@@ -9,7 +9,7 @@ import type { Video } from "../lib/types";
 
 const run = promisify(execFile);
 
-export const SIZES = { reel: { width: 1080, height: 1920 }, explainer: { width: 1920, height: 1080 } } as const;
+export const SIZES = { reel: { width: 1080, height: 1920 }, landscape: { width: 1920, height: 1080 } } as const;
 
 /** Symlink every installed skill into <dir>/.claude/skills with absolute targets. */
 export function linkSkills(dir: string): void {
@@ -40,7 +40,7 @@ export async function prepareProject(v: Video, script: Script, renderRel: string
   fs.writeFileSync(path.join(dir, "SCRIPT.json"), JSON.stringify(script, null, 2));
   const size = SIZES[v.format];
   fs.writeFileSync(path.join(dir, "BRIEF.md"), renderPrompt("brief", {
-    formatName: v.format === "reel" ? "Reel (vertical 9:16)" : "Explainer (landscape 16:9)",
+    formatName: v.format === "reel" ? "Reel (vertical 9:16)" : "Landscape (16:9)",
     width: String(size.width),
     height: String(size.height),
     voice: script.voice,

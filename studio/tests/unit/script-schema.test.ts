@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { validateScript, extractScript, scriptJsonSchema } from "../../lib/script-schema";
+import { validateScript as validate, extractScript, scriptJsonSchema } from "../../lib/script-schema";
+import { getRecipe } from "../../lib/recipes";
+import type { Format, RecipeId } from "../../lib/types";
+
+const validateScript = (raw: unknown, format: Format, recipe: RecipeId = "explainer") =>
+  validate(raw, { format, recipe: getRecipe(recipe) });
 
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "../fixtures/script.json"), "utf8"));
 const clone = () => JSON.parse(JSON.stringify(fixture));
@@ -24,7 +29,7 @@ describe("validateScript", () => {
     const s = clone();
     s.scenes[1].onScreen = "one two three four five six seven";
     expect(validateScript(s, "reel").ok).toBe(false);
-    expect(validateScript(s, "explainer").ok).toBe(true);
+    expect(validateScript(s, "landscape").ok).toBe(true);
   });
 
   it("rejects on-screen text that repeats the spoken line", () => {
@@ -40,6 +45,47 @@ describe("validateScript", () => {
     const s = clone();
     s.scenes = s.scenes.slice(0, 3);
     expect(validateScript(s, "reel").ok).toBe(false);
+  });
+
+  it("validates look colours as hex", () => {
+    const s = clone();
+    s.look.accent = "orange";
+    const r = validateScript(s, "reel");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join()).toMatch(/look\.accent/);
+    s.look.accent = "#abc";
+    expect(validateScript(s, "reel").ok).toBe(true);
+  });
+
+  it("requires a recipe angle", () => {
+    const s = clone();
+    s.angle = "bogus";
+    expect(validateScript(s, "reel").ok).toBe(false);
+  });
+
+  it("motion-graphic needs empty spoken lines and 1-6 scenes", () => {
+    const s = clone();
+    s.angle = "kinetic-title";
+    s.scenes = s.scenes.slice(0, 3);
+    const bad = validateScript(s, "reel", "motion-graphic");
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) expect(bad.errors.join()).toMatch(/spoken: must be empty/);
+    s.scenes.forEach((sc: { spoken: string }) => { sc.spoken = ""; });
+    expect(validateScript(s, "reel", "motion-graphic").ok).toBe(true);
+    s.scenes = [...s.scenes, ...s.scenes];
+    s.scenes.push(s.scenes[0]);
+    expect(validateScript(s, "reel", "motion-graphic").ok).toBe(false);
+  });
+
+  it("uses the recipe scene bounds", () => {
+    const s = clone();
+    s.scenes = s.scenes.slice(0, 3);
+    s.angle = "trend";
+    expect(validateScript(s, "reel", "data-story").ok).toBe(true);
+    s.angle = "story";
+    const r = validateScript(s, "reel", "explainer");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join()).toMatch(/scenes: need 4-12/);
   });
 
   it("reports schema errors with paths", () => {
@@ -65,7 +111,7 @@ describe("extractScript", () => {
 describe("scriptJsonSchema", () => {
   it("requires the same top-level keys as the zod schema", () => {
     expect(scriptJsonSchema.required).toEqual(
-      ["title", "idea", "angle", "voice", "estSeconds", "scenes", "sources", "claims"],
+      ["title", "idea", "angle", "voice", "look", "concept", "estSeconds", "scenes", "sources", "claims"],
     );
   });
 });

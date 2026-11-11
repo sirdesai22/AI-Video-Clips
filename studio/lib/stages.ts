@@ -48,6 +48,7 @@ function summarize(name: string, input: Record<string, unknown>): string {
 
 export function parseStreamLine(line: string): ParsedLine {
   const out: ParsedLine = { texts: [], tools: [] };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let msg: Record<string, any>;
   try { msg = JSON.parse(line); } catch { return out; }
   if (!msg || typeof msg !== "object") return out;

@@ -7,9 +7,9 @@ export default defineConfig({
     include: ["tests/unit/**/*.test.ts"],
     env: {
       DB_PATH: ":memory:",
-      STUDIO_ROOT: path.resolve(__dirname),
+      STUDIO_ROOT: path.resolve(import.meta.dirname),
     },
     testTimeout: 20000,
   },
-  resolve: { alias: { "@": path.resolve(__dirname) } },
+  resolve: { alias: { "@": path.resolve(import.meta.dirname) } },
 });

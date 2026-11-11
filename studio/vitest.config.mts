@@ -8,6 +8,7 @@ export default defineConfig({
     env: {
       DB_PATH: ":memory:",
       STUDIO_ROOT: path.resolve(__dirname),
+      SETUP_CODE: "TESTCODE",
       SESSION_SECRET: "test-secret-test-secret-test-secret-0000",
     },
     testTimeout: 20000,

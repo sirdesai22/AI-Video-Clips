@@ -6,10 +6,12 @@ export const COOKIE = "rs_session";
 export const SESSION_DAYS = 30;
 export const LOCK_AFTER = 5;
 export const LOCK_MS = 5 * 60 * 1000;
+export const LOCK_MAX_MS = 24 * 60 * 60 * 1000;
+export const MIN_LEN = 6;
 
 export type LoginResult =
   | { ok: true; created: boolean }
-  | { ok: false; error: "too_short" }
+  | { ok: false; error: "too_short" | "setup_code" }
   | { ok: false; error: "wrong" | "locked"; retryAt?: number };
 
 export function hashPasscode(p: string): string {
@@ -32,17 +34,25 @@ function lockedUntil(now: number): number | null {
   return v > now ? v : null;
 }
 
+function sameString(a: string, b: string): boolean {
+  const x = Buffer.from(a), y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+}
+
 function resetFailures() {
+  setSetting("lock_level", "0");
   setSetting("fail_count", "0");
   setSetting("lock_until", "0");
 }
 
-export function login(passcode: string, now = Date.now()): LoginResult {
+export function login(passcode: string, now = Date.now(), setupCode?: string): LoginResult {
   const lu = lockedUntil(now);
   if (lu) return { ok: false, error: "locked", retryAt: lu };
   const stored = getSetting("passcode_hash");
   if (!stored) {
-    if (passcode.length < 4) return { ok: false, error: "too_short" };
+    const expected = process.env.SETUP_CODE;
+    if (!expected || !setupCode || !sameString(setupCode, expected)) return { ok: false, error: "setup_code" };
+    if (passcode.length < MIN_LEN) return { ok: false, error: "too_short" };
     setSetting("passcode_hash", hashPasscode(passcode));
     resetFailures();
     return { ok: true, created: true };
@@ -53,9 +63,12 @@ export function login(passcode: string, now = Date.now()): LoginResult {
   }
   const n = Number(getSetting("fail_count") ?? 0) + 1;
   if (n >= LOCK_AFTER) {
-    setSetting("lock_until", String(now + LOCK_MS));
+    const level = Number(getSetting("lock_level") ?? 0);
+    const ms = Math.min(LOCK_MS * 2 ** level, LOCK_MAX_MS);
+    setSetting("lock_until", String(now + ms));
+    setSetting("lock_level", String(level + 1));
     setSetting("fail_count", "0");
-    return { ok: false, error: "locked", retryAt: now + LOCK_MS };
+    return { ok: false, error: "locked", retryAt: now + ms };
   }
   setSetting("fail_count", String(n));
   return { ok: false, error: "wrong" };
@@ -63,9 +76,13 @@ export function login(passcode: string, now = Date.now()): LoginResult {
 
 export function changePasscode(current: string, next: string): boolean {
   const stored = getSetting("passcode_hash");
-  if (!stored || !verifyPasscode(current, stored) || next.length < 4) return false;
+  if (!stored || !verifyPasscode(current, stored) || next.length < MIN_LEN) return false;
   setSetting("passcode_hash", hashPasscode(next));
   return true;
+}
+
+export function assertSessionSecret() {
+  secret();
 }
 
 function secret() {

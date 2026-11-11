@@ -12,6 +12,13 @@ if (!/^SESSION_SECRET=.{32,}$/m.test(env)) {
   fs.writeFileSync(envFile, env);
   console.log("✓ wrote SESSION_SECRET to .env.local");
 }
+if (!/^SETUP_CODE=.+$/m.test(env)) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const code = Array.from(crypto.randomBytes(8), (b) => chars[b % chars.length]).join("");
+  env += `${env && !env.endsWith("\n") ? "\n" : ""}SETUP_CODE=${code}\n`;
+  fs.writeFileSync(envFile, env);
+}
+console.log(`Setup code for first login: ${env.match(/^SETUP_CODE=(.+)$/m)[1]}`);
 for (const d of ["data", "videos"]) fs.mkdirSync(path.join(root, d), { recursive: true });
 
 function check(label, cmd, args) {

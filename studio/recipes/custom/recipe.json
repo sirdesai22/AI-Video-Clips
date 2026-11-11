@@ -1,0 +1,21 @@
+{
+  "id": "custom",
+  "label": "Custom",
+  "tagline": "Anything else: describe the film and it gets its own story, look and sound.",
+  "inputPlaceholder": "Describe the video you want: what it's about, who it's for, the feel, and any exact words. Add links to sources.",
+  "narration": true,
+  "scenes": { "min": 3, "max": 16 },
+  "duration": { "reel": "about 20–45 s", "landscape": "about 30–90 s" },
+  "angles": [],
+  "knobs": ["palette", "voiceTone", "musicMood", "length", "audience", "exactWording", "cta", "voice"],
+  "skillRefs": [
+    "SKILL.md",
+    "references/story.md",
+    "references/spec.md",
+    "references/look.md",
+    "references/film.md",
+    "references/motion.md",
+    "references/sound.md"
+  ],
+  "needsUrl": false
+}

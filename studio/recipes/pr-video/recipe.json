@@ -1,0 +1,21 @@
+{
+  "id": "pr-video",
+  "label": "PR video",
+  "tagline": "What a pull request changed and why it matters, with a few real code hunks.",
+  "inputPlaceholder": "Paste a public GitHub pull request URL. Optionally say the audience (developers, mixed, non-technical) and anything users must do.",
+  "narration": true,
+  "scenes": { "min": 3, "max": 10 },
+  "duration": { "reel": "about 20–40 s", "landscape": "about 30–70 s, sized to the PR" },
+  "angles": ["changelog", "feature-reveal", "fix", "refactor"],
+  "knobs": ["angle", "palette", "voiceTone", "musicMood", "length", "audience", "exactWording", "cta", "voice"],
+  "skillRefs": [
+    "references/film.md",
+    "references/types/explainer.md",
+    "references/story.md",
+    "references/spec.md",
+    "references/motion.md",
+    "references/sound.md",
+    "references/captions.md"
+  ],
+  "needsUrl": true
+}

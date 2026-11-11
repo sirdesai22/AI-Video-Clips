@@ -1,0 +1,19 @@
+{
+  "id": "motion-graphic",
+  "label": "Motion graphic",
+  "tagline": "One short, design-led idea where the movement carries the message. No narration.",
+  "inputPlaceholder": "Describe one idea in a sentence or two with the exact words or numbers to show, e.g. \"ARR counts up to $4.2M, then +312% YoY stamps in.\"",
+  "narration": false,
+  "scenes": { "min": 1, "max": 6 },
+  "duration": { "reel": "about 6–15 s", "landscape": "about 6–15 s" },
+  "angles": ["kinetic-title", "count-up", "chart", "social-post", "map-route"],
+  "knobs": ["angle", "palette", "musicMood", "length", "exactWording", "cta"],
+  "skillRefs": [
+    "references/film.md",
+    "references/motion.md",
+    "references/spec.md",
+    "references/types/data.md",
+    "references/sound.md"
+  ],
+  "needsUrl": false
+}

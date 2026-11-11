@@ -17,4 +17,5 @@ export const skillsSource = () => path.join(repoRoot(), ".agents", "skills");
 export const kokoroPython = () =>
   process.env.HYPERFRAMES_PYTHON ?? path.join(repoRoot(), ".venv-kokoro", "bin", "python");
 export const promptsDir = () => path.join(studioRoot(), "prompts");
+export const recipesDir = () => path.join(studioRoot(), "recipes");
 export const fixturesDir = () => path.join(studioRoot(), "tests", "fixtures");

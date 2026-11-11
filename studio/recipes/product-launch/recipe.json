@@ -1,0 +1,21 @@
+{
+  "id": "product-launch",
+  "label": "Product launch",
+  "tagline": "A launch film built from your real site: its screens, colours and words.",
+  "inputPlaceholder": "Paste the product URL, then one line on what's new, who it's for and the call to action (e.g. \"Try it free\").",
+  "narration": true,
+  "scenes": { "min": 4, "max": 10 },
+  "duration": { "reel": "about 20–30 s", "landscape": "about 30–45 s" },
+  "angles": ["launch", "tour", "social"],
+  "knobs": ["angle", "palette", "voiceTone", "musicMood", "length", "audience", "exactWording", "cta", "voice"],
+  "skillRefs": [
+    "references/types/launch.md",
+    "references/story.md",
+    "references/spec.md",
+    "references/look.md",
+    "references/film.md",
+    "references/motion.md",
+    "references/sound.md"
+  ],
+  "needsUrl": true
+}

@@ -1,4 +1,5 @@
 export type Format = "reel" | "explainer";
+export type RecipeId = "explainer" | "product-launch" | "motion-graphic" | "data-story" | "pr-video" | "custom";
 export type VideoStatus =
   | "scripting" | "script_ready" | "script_failed"
   | "queued" | "building" | "ready" | "failed" | "interrupted";

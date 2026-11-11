@@ -1,0 +1,21 @@
+{
+  "id": "data-story",
+  "label": "Data story",
+  "tagline": "Real numbers from your sources, each one earned and made physical.",
+  "inputPlaceholder": "Paste the numbers (or a small table) with links to where they come from, and the one point the data makes.",
+  "narration": true,
+  "scenes": { "min": 2, "max": 8 },
+  "duration": { "reel": "about 15–30 s", "landscape": "about 20–45 s" },
+  "angles": ["one-number", "trend", "comparison", "ranking"],
+  "knobs": ["angle", "palette", "voiceTone", "musicMood", "length", "audience", "exactWording", "cta", "voice"],
+  "skillRefs": [
+    "references/types/data.md",
+    "references/story.md",
+    "references/spec.md",
+    "references/film.md",
+    "references/motion.md",
+    "references/sound.md",
+    "references/captions.md"
+  ],
+  "needsUrl": false
+}

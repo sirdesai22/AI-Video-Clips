@@ -1,0 +1,21 @@
+{
+  "id": "explainer",
+  "label": "Explainer",
+  "tagline": "One idea made clear through one real example, worked start to finish.",
+  "inputPlaceholder": "Paste an article, notes or a topic, plus links to your sources. Say who it's for and the one thing they should remember.",
+  "narration": true,
+  "scenes": { "min": 4, "max": 12 },
+  "duration": { "reel": "about 30–45 s", "landscape": "about 45–90 s" },
+  "angles": ["concept", "how-to", "listicle", "story"],
+  "knobs": ["angle", "palette", "voiceTone", "musicMood", "length", "audience", "exactWording", "cta", "voice"],
+  "skillRefs": [
+    "references/types/explainer.md",
+    "references/story.md",
+    "references/spec.md",
+    "references/film.md",
+    "references/motion.md",
+    "references/sound.md",
+    "references/captions.md"
+  ],
+  "needsUrl": false
+}

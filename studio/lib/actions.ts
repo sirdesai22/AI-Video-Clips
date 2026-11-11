@@ -37,7 +37,8 @@ export function createVideoAction(body: unknown): ActionResult {
   if (options.voice && !VOICE_RE.test(options.voice)) return fail("Unknown voice", 400);
   // No fallback voice: with none chosen, the script writer picks one that matches the tone.
   const stored = getSetting("default_voice");
-  if (!options.voice && stored && VOICE_RE.test(stored)) options.voice = stored;
+  const rc = getRecipe(p.data.recipe);
+  if (!options.voice && stored && VOICE_RE.test(stored) && rc.narration && rc.knobs.includes("voice")) options.voice = stored;
   const video = createVideo({ format: p.data.format, recipe: p.data.recipe, input: p.data.input, options });
   enqueueJob(video.id, "script", {});
   return { ok: true, video };

@@ -4,9 +4,11 @@ test("reel: script → edit → approve → result → change", async ({ page })
   await page.goto("/");
 
   await expect(page.getByRole("radio", { name: /Reel/ })).toHaveAttribute("aria-checked", "true");
-  await expect(page.getByPlaceholder("e.g. bold, calm, funny")).toBeHidden();
+  await expect(page.getByText("Audience", { exact: true })).toBeHidden();
   await expect(page.getByRole("radio", { name: /Explainer/ })).toHaveAttribute("aria-checked", "true");
   await page.getByRole("radio", { name: /Explainer/ }).click();
+  await page.getByText("More options").click();
+  await expect(page.getByText("Audience", { exact: true })).toBeVisible();
   await page.getByRole("textbox", { name: /about/ }).fill("https://www.highagency.com/");
   await page.getByRole("button", { name: "Write script" }).click();
 

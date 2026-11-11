@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { BottomBar, Disclosure } from "./ui";
 import type { VideoDetail } from "@/lib/actions";
+import { withLookDefaults } from "@/lib/look-defaults";
 import type { Script } from "@/lib/script-schema";
 
 type Look = Script["look"];
@@ -145,7 +146,9 @@ export default function ScriptReview({ detail, onChange }: { detail: VideoDetail
         </p>
       </div>
 
-      <LookPanel look={s.look} concept={s.concept} editing={editing} onLook={updateLook} onConcept={updateConcept} />
+      {s.look && s.concept
+        ? <LookPanel look={s.look} concept={s.concept} editing={editing} onLook={updateLook} onConcept={updateConcept} />
+        : <p className="text-sm text-muted">No look saved for this script. Rewrite to get one, or Edit to add one.</p>}
 
       <ol className="grid gap-3 md:grid-cols-2">
         {s.scenes.map((sc, i) => (
@@ -241,7 +244,7 @@ export default function ScriptReview({ detail, onChange }: { detail: VideoDetail
         ) : (
           <>
             <button className="btn-primary" disabled={busy || checking} onClick={() => approve()}>{checking ? "Checking…" : "Approve & make video"}</button>
-            <button className="btn-secondary" onClick={() => { setDraft(structuredClone(current.script)); setEditing(true); }}>Edit</button>
+            <button className="btn-secondary" onClick={() => { setDraft(withLookDefaults(structuredClone(current.script))); setEditing(true); }}>Edit</button>
             <button className="btn-secondary" onClick={() => setAskNote((x) => !x)}>Rewrite</button>
           </>
         )}

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import * as db from "../../lib/db";
+import { withLookDefaults } from "../../lib/look-defaults";
 import { buildAction, createVideoAction, scriptAction, videoDetail } from "../../lib/actions";
 
 const script = JSON.parse(fs.readFileSync(path.join(__dirname, "../fixtures/script.json"), "utf8"));
@@ -45,6 +46,25 @@ describe("createVideoAction recipes and voice", () => {
     db.setSetting("default_voice", "bm_george");
     const r = createVideoAction({ input: "abc topic" });
     expect(r).toMatchObject({ ok: true, video: { options: { voice: "bm_george" } } });
+  });
+});
+
+describe("older scripts without look/concept", () => {
+  it("default stored voice skips types without a voice knob", () => {
+    db.setSetting("default_voice", "bm_george");
+    expect(createVideoAction({ input: "abc topic", recipe: "motion-graphic" })).toMatchObject({ ok: true, video: { options: {} } });
+  });
+  it("can be edited and saved once seeded with defaults", () => {
+    const old = { ...script };
+    delete old.look;
+    delete old.concept;
+    const r = createVideoAction({ input: "https://example.com story" });
+    if (!r.ok) throw new Error("create failed");
+    const ver = db.addScript(r.video.id, old, null);
+    db.updateVideo(r.video.id, { status: "script_ready", scriptVersion: ver });
+    expect(videoDetail(r.video.id)?.script?.script.look).toBeUndefined();
+    expect(scriptAction(r.video.id, { action: "edit", script: old })).toMatchObject({ ok: false, status: 422 });
+    expect(scriptAction(r.video.id, { action: "edit", script: withLookDefaults(old) })).toMatchObject({ ok: true });
   });
 });
 

@@ -9,7 +9,9 @@ export const dynamic = "force-dynamic";
 const run = promisify(execFile);
 
 export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const dir = projectDir((await ctx.params).id);
+  const id = (await ctx.params).id;
+  if (!/^[0-9a-z]{10}$/.test(id)) return Response.json({ error: "Not found" }, { status: 404 });
+  const dir = projectDir(id);
   if (!fs.existsSync(dir)) return Response.json({ error: "No project yet" }, { status: 404 });
   try {
     const { stdout } = await run("npx", ["--yes", "hyperframes", "preview", "--background"], { cwd: dir, timeout: 120_000 });

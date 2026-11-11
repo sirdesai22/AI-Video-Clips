@@ -103,7 +103,7 @@ describe("prepareProject", () => {
   it("writes a product-launch brief that captures the product URL", async () => {
     const v = db.createVideo({ format: "landscape", recipe: "product-launch", input: "https://example.com/app, new export. Try it free", options: {} });
     const brief = fs.readFileSync(path.join(await prepareProject(v, script), "BRIEF.md"), "utf8");
-    expect(brief).toContain("`npx hyperframes capture 'https://example.com/app' --json`");
+    expect(brief).toContain("`npx hyperframes capture 'https://example.com/app' -o capture --json`");
     expect(brief).toContain("This URL (or no-URL) rule wins over the video type rules below.");
     expect(brief).toContain("the captured brand tokens win when they differ");
   });
@@ -178,6 +178,31 @@ describe("buildPrompt", () => {
       expect(t).not.toMatch(/`(git|gh|curl|wget|python3?|node|npm|bash|sh|ls|cat|mkdir|rm|cp|mv|open|sox)\s/);
       for (const m of t.matchAll(/`npx (\S+)/g)) expect(m[1]).toBe("hyperframes");
     }
+  });
+});
+
+describe("runBuildJob with an old script", () => {
+  const old = { ...script };
+  delete old.look;
+  delete old.concept;
+  const oldVideo = () => {
+    const v = db.createVideo({ format: "reel", input: "x", options: {} });
+    const ver = db.addScript(v.id, old, null);
+    return db.updateVideo(v.id, { status: "queued", scriptVersion: ver });
+  };
+  it("builds a new video from a script with no look or concept", async () => {
+    const v = oldVideo();
+    await runBuildJob(db.enqueueJob(v.id, "build", { mode: "new" }));
+    expect(db.getVideo(v.id)).toMatchObject({ status: "ready" });
+  });
+  it("revises it and keeps the existing BRIEF.md", async () => {
+    const v = oldVideo();
+    await runBuildJob(db.enqueueJob(v.id, "build", { mode: "new" }));
+    const brief = path.join(projectDir(v.id), "BRIEF.md");
+    fs.writeFileSync(brief, "AS THE AGENT SAW IT");
+    await runBuildJob(db.enqueueJob(v.id, "build", { mode: "revise", request: "bigger" }));
+    expect(db.getVideo(v.id)).toMatchObject({ status: "ready", renderVersion: 2 });
+    expect(fs.readFileSync(brief, "utf8")).toBe("AS THE AGENT SAW IT");
   });
 });
 

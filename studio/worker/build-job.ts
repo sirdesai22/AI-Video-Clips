@@ -5,6 +5,7 @@ import { promisify } from "node:util";
 import { addEvent, addRender, getScript, getVideo, updateVideo } from "../lib/db";
 import { kokoroPython, rendersDir } from "../lib/paths";
 import { renderPrompt } from "../lib/prompts";
+import { withLookDefaults } from "../lib/look-defaults";
 import { getRecipe } from "../lib/recipes";
 import { parseStreamLine, progressAtStart, stageIndex, type StageName } from "../lib/stages";
 import type { Script } from "../lib/script-schema";
@@ -18,8 +19,8 @@ export const ALLOWED_TOOLS =
   "Read,Write,Edit,Glob,Grep,Skill,WebFetch,Bash(npx hyperframes:*),Bash(ffmpeg:*),Bash(ffprobe:*)";
 
 /** Prepares the project so the next render lands at renders/v<renderVersion+1>.mp4. */
-export async function prepareProject(v: Video, script: Script): Promise<string> {
-  return prepareProjectRaw(v, script, `renders/v${v.renderVersion + 1}.mp4`);
+export async function prepareProject(v: Video, script: Script, keepBrief = false): Promise<string> {
+  return prepareProjectRaw(v, script, `renders/v${v.renderVersion + 1}.mp4`, keepBrief);
 }
 
 /** The first-build prompt: prompts/build.md with the voice and caption stages set by the recipe and format. */
@@ -65,13 +66,16 @@ export async function runBuildJob(job: Job, opts: { timeoutMs?: number } = {}): 
   const renderRel = `renders/v${n}.mp4`;
   const renderAbs = path.join(rendersDir(v.id), `v${n}.mp4`);
   const resume = payload.mode !== "new" && !!v.sessionId;
+  const script = withLookDefaults(row.script as Script);
+  // A resumed session already read BRIEF.md; keep it as the agent saw it.
+  const keepBrief = payload.mode === "revise" || (payload.mode === "retry" && resume);
 
   updateVideo(v.id, { status: "building", stage: "starting", progress: 0, error: null });
   addEvent(v.id, "log", `build ${payload.mode} → ${renderRel}`);
 
   let cwd: string;
   try {
-    cwd = await prepareProject(v, row.script as Script);
+    cwd = await prepareProject(v, script, keepBrief);
   } catch (e) {
     updateVideo(v.id, { status: "failed", error: `Couldn't set up the project: ${String(e).slice(0, 300)}` });
     return;
@@ -81,7 +85,7 @@ export async function runBuildJob(job: Job, opts: { timeoutMs?: number } = {}): 
     ? renderPrompt("revise", { request: payload.request ?? "", renderPath: renderRel })
     : payload.mode === "retry" && resume
       ? renderPrompt("retry", { reason: v.error ?? "it was interrupted", renderPath: renderRel })
-      : buildPrompt(v, row.script as Script, renderRel);
+      : buildPrompt(v, script, renderRel);
 
   let current = -1;
   let resultError: string | null = null;

@@ -2,14 +2,17 @@
 // Stands in for `claude` when AGENT=fake. Reads the prompt from stdin like `claude -p`.
 import fs from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+process.stderr.write(`pid:${process.pid}\n`);
 let prompt = "";
 for await (const chunk of process.stdin) prompt += chunk;
 
+if (process.env.FAKE_GRANDCHILD === "1") { spawn("sleep", ["600"], { stdio: "inherit" }); await sleep(600000); }
 if (process.env.FAKE_HANG === "1") { await sleep(600000); }
 if (process.env.FAKE_FAIL === "1") {
   console.log(JSON.stringify({ type: "result", subtype: "error", is_error: true, result: "fake failure", session_id: "fake-session" }));

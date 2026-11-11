@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import path from "node:path";
 import { fixturesDir } from "../lib/paths";
 import { getSetting } from "../lib/db";
@@ -30,43 +30,83 @@ export function modelArgs(): string[] {
 export function runClaude(o: RunOptions): Promise<RunResult> {
   return new Promise((resolve) => {
     const { cmd, preArgs } = claudeCommand();
-    const child = spawn(cmd, [...preArgs, "-p", ...o.args], {
-      cwd: o.cwd,
-      env: { ...process.env, ...o.env },
-      stdio: ["pipe", "pipe", "pipe"],
-    });
     let stdout = "";
     let stderr = "";
     let buf = "";
     let timedOut = false;
+    let done = false;
+
+    let child: ChildProcess;
+    try {
+      child = spawn(cmd, [...preArgs, "-p", ...o.args], {
+        cwd: o.cwd,
+        env: { ...process.env, ...o.env },
+        stdio: ["pipe", "pipe", "pipe"],
+        detached: true,
+      });
+    } catch (e) {
+      resolve({ code: null, timedOut: false, stdout: "", stderr: String(e) });
+      return;
+    }
+
+    const killGroup = (sig: NodeJS.Signals) => {
+      try { process.kill(-child.pid!, sig); } catch { /* already gone */ }
+    };
+    const onParentExit = () => killGroup("SIGKILL");
+    process.once("exit", onParentExit);
+
+    const emit = (line: string) => {
+      try { o.onLine?.(line); } catch (e) { stderr += `onLine error: ${String(e)}\n`; }
+    };
+
+    let exitCode: number | null = null;
+    let graceTimer: NodeJS.Timeout | undefined;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      clearTimeout(graceTimer);
+      process.removeListener("exit", onParentExit);
+      child.stdout?.destroy();
+      child.stderr?.destroy();
+      if (buf.trim()) emit(buf.trim());
+      buf = "";
+      resolve({ code: exitCode, timedOut, stdout, stderr });
+    };
+
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill("SIGTERM");
-      setTimeout(() => child.kill("SIGKILL"), 5000).unref();
+      killGroup("SIGTERM");
+      setTimeout(() => killGroup("SIGKILL"), 5000).unref();
     }, o.timeoutMs);
 
-    child.stdout.on("data", (d: Buffer) => {
-      const s = d.toString();
+    child.stdout!.setEncoding("utf8");
+    child.stderr!.setEncoding("utf8");
+    child.stdout!.on("data", (s: string) => {
       stdout += s;
       buf += s;
       let i: number;
       while ((i = buf.indexOf("\n")) >= 0) {
         const line = buf.slice(0, i).trim();
         buf = buf.slice(i + 1);
-        if (line) o.onLine?.(line);
+        if (line) emit(line);
       }
     });
-    child.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
+    child.stderr!.on("data", (s: string) => { stderr += s; });
     child.on("error", (err) => {
-      clearTimeout(timer);
-      resolve({ code: null, timedOut, stdout, stderr: stderr + String(err) });
+      stderr += String(err);
+      finish();
+    });
+    child.on("exit", (code) => {
+      exitCode = code;
+      // A grandchild holding the pipes can keep "close" from firing.
+      graceTimer = setTimeout(finish, 2000);
     });
     child.on("close", (code) => {
-      clearTimeout(timer);
-      if (buf.trim()) o.onLine?.(buf.trim());
-      resolve({ code, timedOut, stdout, stderr });
+      if (exitCode === null) exitCode = code;
+      finish();
     });
-    child.stdin.on("error", () => {});
-    child.stdin.end(o.prompt);
+    child.stdin!.on("error", () => {});
+    child.stdin!.end(o.prompt);
   });
 }

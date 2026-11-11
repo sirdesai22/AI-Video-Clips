@@ -14,6 +14,9 @@ beforeEach(() => {
 afterEach(() => {
   delete process.env.AGENT;
   delete process.env.FAKE_HANG;
+  delete process.env.FAKE_GRANDCHILD;
+  delete process.env.FAKE_FAIL;
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 describe("claudeCommand", () => {
@@ -51,6 +54,31 @@ describe("runClaude", () => {
     process.env.FAKE_HANG = "1";
     const r = await runClaude({ cwd: dir, prompt: "x", args: [], timeoutMs: 500 });
     expect(r.timedOut).toBe(true);
+    const pid = Number(/pid:(\d+)/.exec(r.stderr)![1]);
+    expect(() => process.kill(pid, 0)).toThrow();
+  });
+
+  it("resolves on timeout even when a grandchild holds the pipes", async () => {
+    process.env.FAKE_GRANDCHILD = "1";
+    const t0 = Date.now();
+    const r = await runClaude({ cwd: dir, prompt: "x", args: [], timeoutMs: 500 });
+    expect(r.timedOut).toBe(true);
+    expect(Date.now() - t0).toBeLessThan(8000);
+  });
+
+  it("survives an onLine that throws", async () => {
+    const r = await runClaude({
+      cwd: dir, prompt: "build", args: ["--output-format", "stream-json"], timeoutMs: 20000,
+      onLine: () => { throw new Error("boom"); },
+    });
+    expect(r.code).toBe(0);
+  });
+
+  it("reports a non-zero exit code on failure", async () => {
+    process.env.FAKE_FAIL = "1";
+    const r = await runClaude({ cwd: dir, prompt: "x", args: [], timeoutMs: 20000 });
+    expect(r.code).not.toBe(0);
+    expect(r.timedOut).toBe(false);
   });
 });
 

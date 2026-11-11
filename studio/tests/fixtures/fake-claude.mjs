@@ -33,6 +33,7 @@ if (args.includes("--json-schema")) {
   process.exit(0);
 }
 
+fs.appendFileSync(path.join(process.cwd(), ".fake-calls.jsonl"), JSON.stringify({ argv: args, prompt }) + "\n");
 const delay = Number(process.env.FAKE_DELAY_MS ?? 0);
 for (const line of fs.readFileSync(path.join(here, "build-stream.jsonl"), "utf8").split("\n").filter(Boolean)) {
   if (line.includes('"type":"result"') && process.env.RENDER_PATH) {

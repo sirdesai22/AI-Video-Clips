@@ -19,7 +19,8 @@ export function linkSkills(dir: string): void {
   fs.mkdirSync(dest, { recursive: true });
   for (const name of fs.readdirSync(src)) {
     const link = path.join(dest, name);
-    if (!fs.existsSync(link)) fs.symlinkSync(path.join(src, name), link);
+    try { fs.lstatSync(link); continue; } catch { /* missing: create it */ }
+    fs.symlinkSync(path.join(src, name), link);
   }
 }
 

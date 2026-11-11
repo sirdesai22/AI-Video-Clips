@@ -1,7 +1,14 @@
 # Reel Studio — design
 
 Date: 2026-11-11
-Status: draft for review
+Status: approved; amended the same day
+
+> **Amendment (owner, 2026-11-11): laptop only.** The app runs only on the owner's Mac and is opened in a browser on that Mac.
+> - It binds to `127.0.0.1:3000`, so phones and other devices can't reach it.
+> - Because it is local-only, there is **no passcode, login or session**. The passcode screen, cookie and lockout described below are dropped.
+> - The layout is **laptop-first**: wider pages, two columns where they help, and Download in place of the phone share sheet.
+>
+> Everything else below stands.
 
 ## 1. Purpose
 

@@ -1,0 +1,66 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #f3efe4; }
+    #cr-art { position: absolute; inset: 0; }
+    #cr-art svg { width: 100%; height: 100%; overflow: visible; }
+    .cr-line { fill: none; stroke: #f3efe4; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .cr-x { fill: none; stroke: #ffad4a; stroke-width: 9; stroke-linecap: round; }
+    #cr-kick { position: absolute; left: 160px; top: 110px; font-family: "Archivo Black", sans-serif; font-size: 80px; line-height: 1.05; letter-spacing: -0.02em; }
+    #cr-quote { position: absolute; left: 960px; top: 330px; width: 820px; }
+    #cr-q { position: relative; font-family: "Archivo Black", sans-serif; font-size: 78px; line-height: 1.08; letter-spacing: -0.02em; }
+    .cr-strike { position: absolute; left: -10px; height: 12px; background: #ffad4a; }
+    #cr-strike1 { top: 23%; right: -10px; }
+    #cr-strike2 { top: 73%; width: 640px; }
+    #cr-who { margin-top: 26px; font-size: 36px; font-weight: 700; opacity: 0.8; }
+    #cr-next { position: absolute; left: 960px; top: 800px; width: 820px; font-family: "Archivo Black", sans-serif; font-size: 62px; line-height: 1.1; letter-spacing: -0.02em; }
+    .w { display: inline-block; margin-right: 0.24em; }
+  </style>
+  <div id="root" data-composition-id="crashes" data-start="0" data-duration="7.5" data-width="1920" data-height="1080">
+    <div id="cr-art" class="clip" data-start="0" data-duration="7.5" data-track-index="1">
+      <div id="cr-art-in" style="position:absolute;inset:0">
+        <svg viewBox="0 0 1920 1080">
+          <g id="cr-g1" transform="translate(470 470)">
+            <g class="cr-glider"><path class="cr-line" d="M -160 -22 L 160 -22 M -160 22 L 160 22 M -120 -22 L -120 22 M 0 -22 L 0 22 M 120 -22 L 120 22 M -160 0 L -235 0 M -235 -18 L -235 18" /></g>
+            <path class="cr-x" pathLength="1" d="M -90 -90 L 90 90 M 90 -90 L -90 90" />
+          </g>
+          <g id="cr-g2" transform="translate(560 680)">
+            <g class="cr-glider"><path class="cr-line" d="M -160 -22 L 160 -22 M -160 22 L 160 22 M -120 -22 L -120 22 M 0 -22 L 0 22 M 120 -22 L 120 22 M -160 0 L -235 0 M -235 -18 L -235 18" /></g>
+            <path class="cr-x" pathLength="1" d="M -90 -90 L 90 90 M 90 -90 L -90 90" />
+          </g>
+          <g id="cr-g3" transform="translate(380 880)">
+            <g class="cr-glider"><path class="cr-line" d="M -160 -22 L 160 -22 M -160 22 L 160 22 M -120 -22 L -120 22 M 0 -22 L 0 22 M 120 -22 L 120 22 M -160 0 L -235 0 M -235 -18 L -235 18" /></g>
+            <path class="cr-x" pathLength="1" d="M -90 -90 L 90 90 M 90 -90 L -90 90" />
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div id="cr-kick" class="clip" data-start="0" data-duration="7.5" data-track-index="2"><span class="w">Four</span><span class="w">years</span><span class="w">of</span><span class="w">crashes.</span></div>
+    <div id="cr-quote" class="clip" data-start="0" data-duration="7.5" data-track-index="3" data-layout-allow-overlap>
+      <div id="cr-q">“Not in a thousand years will man fly.”<div id="cr-strike1" class="cr-strike"></div><div id="cr-strike2" class="cr-strike"></div></div>
+      <div id="cr-who">— Wilbur Wright, at his lowest</div>
+    </div>
+    <div id="cr-next" class="clip" data-start="0" data-duration="7.5" data-track-index="4"><span class="w">The</span><span class="w">next</span><span class="w">morning,</span><span class="w">he</span><span class="w">was</span><span class="w">sketching</span><span class="w">again.</span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#cr-kick .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 0.15);
+      const gl = ["#cr-g1", "#cr-g2", "#cr-g3"], rot = [28, -34, 22];
+      gl.forEach(function (g, i) {
+        const t = 0.1 + i * 0.75;
+        tl.fromTo(g + " .cr-glider", { opacity: 0, y: -220, x: -60, rotation: 0 }, { opacity: 1, y: 0, x: 0, rotation: rot[i], duration: 0.45, ease: "power3.in" }, t);
+        tl.fromTo(g + " .cr-x", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.18, ease: "power2.out" }, t + 0.47);
+      });
+      tl.to("#cr-art-in", { opacity: 0.3, duration: 0.3, ease: "power2.out" }, 2.6);
+      tl.to("#cr-kick", { opacity: 0.38, duration: 0.3, ease: "power2.out" }, 2.6);
+      tl.fromTo("#cr-q", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 2.6);
+      tl.fromTo("#cr-who", { opacity: 0 }, { opacity: 0.8, duration: 0.2 }, 2.8);
+      tl.fromTo(["#cr-strike1", "#cr-strike2"], { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.3, ease: "expo.out", stagger: 0.18 }, 3.9);
+      tl.to("#cr-q", { opacity: 0.5, duration: 0.3 }, 4.1);
+      tl.fromTo("#cr-next .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 4.2);
+      // blur swap out
+      tl.to(["#cr-art-in", "#cr-kick", "#cr-quote", "#cr-next"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power3.in" }, 7.25);
+      window.__timelines["crashes"] = tl;
+    })();
+  </script>
+</template>

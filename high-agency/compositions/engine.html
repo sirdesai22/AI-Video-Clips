@@ -1,0 +1,71 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #f3efe4; }
+    #en-art { position: absolute; inset: 0; }
+    #en-art svg { width: 100%; height: 100%; overflow: visible; }
+    .en-line { fill: none; stroke: #f3efe4; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .en-label { fill: #f3efe4; font-family: "Inter", sans-serif; font-weight: 700; font-size: 36px; }
+    #en-l1, #en-l2 { position: absolute; left: 160px; font-family: "Archivo Black", sans-serif; font-size: 80px; line-height: 1.05; letter-spacing: -0.02em; }
+    #en-l1 { top: 90px; }
+    #en-l2 { top: 190px; }
+    #en-lb { position: absolute; left: 1250px; top: 220px; font-family: "Archivo Black", sans-serif; font-size: 150px; line-height: 1; color: #ffad4a; letter-spacing: -0.02em; }
+    .w { display: inline-block; margin-right: 0.24em; }
+  </style>
+  <div id="root" data-composition-id="engine" data-start="0" data-duration="6.4" data-width="1920" data-height="1080">
+    <div id="en-art" class="clip" data-start="0" data-duration="6.4" data-track-index="1">
+      <div id="en-art-in" style="position:absolute;inset:0">
+        <svg viewBox="0 0 1920 1080">
+          <path id="en-stand" class="en-line" pathLength="1" d="M 960 380 L 960 930 M 780 930 L 1140 930 M 920 380 L 1000 380" />
+          <g id="en-beam"><path id="en-beam-line" class="en-line" pathLength="1" d="M 510 400 L 1410 400" /></g>
+          <circle cx="960" cy="400" r="14" fill="#f3efe4" />
+          <g id="en-left">
+            <path id="en-lhang" class="en-line" pathLength="1" d="M 510 400 L 410 620 M 510 400 L 610 620 M 380 620 Q 510 690 640 620 Z" />
+            <text class="en-label" x="510" y="740" text-anchor="middle">The plane</text>
+          </g>
+          <g id="en-right">
+            <path id="en-rhang" class="en-line" pathLength="1" d="M 1410 400 L 1310 620 M 1410 400 L 1510 620 M 1280 620 Q 1410 690 1540 620 Z" />
+            <g id="en-heavy">
+              <path class="en-line" d="M 1300 460 L 1520 460 L 1520 618 L 1300 618 Z M 1330 460 L 1330 420 L 1400 420 L 1400 460 M 1420 460 L 1420 420 L 1490 420 L 1490 460 M 1300 540 L 1520 540" />
+              <text class="en-label" x="1410" y="740" text-anchor="middle">Off-the-shelf engine</text>
+            </g>
+            <g id="en-light">
+              <path id="en-light-path" class="en-line" pathLength="1" d="M 1345 540 L 1475 540 L 1475 618 L 1345 618 Z M 1355 540 L 1355 515 M 1375 540 L 1375 515 M 1395 540 L 1395 515 M 1415 540 L 1415 515 M 1435 540 L 1435 515 M 1455 540 L 1455 515 M 1345 580 L 1475 580" />
+              <text class="en-label" x="1410" y="740" text-anchor="middle">Their aluminium engine</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div id="en-l1" class="clip" data-start="0" data-duration="6.4" data-track-index="2"><span class="w">Engines</span><span class="w">were</span><span class="w">too</span><span class="w">heavy.</span></div>
+    <div id="en-l2" class="clip" data-start="0" data-duration="6.4" data-track-index="3"><span class="w">So</span><span class="w">they</span><span class="w">built</span><span class="w">their</span><span class="w">own.</span></div>
+    <div id="en-lb" class="clip" data-start="0" data-duration="6.4" data-track-index="4">180 lb</div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const tilt = 12, dy = 450 * Math.sin(tilt * Math.PI / 180);
+      tl.fromTo(["#en-stand", "#en-beam-line", "#en-lhang", "#en-rhang"], { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut", stagger: 0.1 }, 0);
+      tl.set("#en-light", { opacity: 0 }, 0);
+      // the stock engine drops in and the scale slams down
+      tl.fromTo("#en-heavy", { opacity: 0, y: -260 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.in" }, 0.8);
+      tl.fromTo("#en-beam", { rotation: 0, svgOrigin: "960 400" }, { rotation: tilt, svgOrigin: "960 400", duration: 0.5, ease: "back.out(1.6)" }, 1.15);
+      tl.fromTo("#en-right", { y: 0 }, { y: dy, duration: 0.5, ease: "back.out(1.6)" }, 1.15);
+      tl.fromTo("#en-left", { y: 0 }, { y: -dy, duration: 0.5, ease: "back.out(1.6)" }, 1.15);
+      tl.fromTo("#en-l1 .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 1.3);
+      // swap in their own engine and the scale levels
+      tl.to("#en-heavy", { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power3.in" }, 2.9);
+      tl.set("#en-light", { opacity: 1 }, 3.05);
+      tl.fromTo("#en-light-path", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, 3.05);
+      tl.to("#en-beam", { rotation: 0, svgOrigin: "960 400", duration: 0.8, ease: "power2.inOut" }, 3.4);
+      tl.to("#en-right", { y: 0, duration: 0.8, ease: "power2.inOut" }, 3.4);
+      tl.to("#en-left", { y: 0, duration: 0.8, ease: "power2.inOut" }, 3.4);
+      tl.to("#en-l1", { opacity: 0.38, duration: 0.25 }, 3.2);
+      tl.fromTo("#en-l2 .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 3.2);
+      tl.fromTo("#en-lb", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 3.9);
+      // whip out
+      tl.to("#en-art-in", { x: -260, opacity: 0, filter: "blur(14px)", duration: 0.25, ease: "power3.in" }, 6.12);
+      tl.to(["#en-l1", "#en-l2", "#en-lb"], { opacity: 0, duration: 0.2, ease: "power3.in" }, 6.15);
+      window.__timelines["engine"] = tl;
+    })();
+  </script>
+</template>

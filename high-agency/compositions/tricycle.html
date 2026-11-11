@@ -1,0 +1,48 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #f3efe4; }
+    #tc-art { position: absolute; inset: 0; }
+    #tc-art svg { width: 100%; height: 100%; overflow: visible; }
+    .tc-line { fill: none; stroke: #f3efe4; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .tc-lead { fill: none; stroke: #f3efe4; stroke-width: 2.5; opacity: 0.8; }
+    .tc-label { fill: #f3efe4; font-family: "Inter", sans-serif; font-weight: 700; font-size: 40px; }
+    #tc-l1, #tc-l2 { position: absolute; left: 160px; font-family: "Archivo Black", sans-serif; font-size: 96px; line-height: 1.05; letter-spacing: -0.02em; }
+    #tc-l1 { top: 110px; }
+    #tc-l2 { top: 225px; }
+    #tc-l2 .acc { color: #ffad4a; }
+    #tc-credit { position: absolute; left: 160px; top: 925px; font-size: 30px; font-weight: 700; opacity: 0.75; }
+    .w { display: inline-block; margin-right: 0.24em; }
+  </style>
+  <div id="root" data-composition-id="tricycle" data-start="0" data-duration="8.5" data-width="1920" data-height="1080">
+    <div id="tc-art" class="clip" data-start="0" data-duration="8.5" data-track-index="1">
+      <svg viewBox="0 0 1920 1080">
+        <path id="tc-frame" class="tc-line" pathLength="1" d="M 1300 640 L 1240 410 M 1170 370 L 1300 392 M 1240 410 L 1215 380 M 1240 440 L 900 470 M 900 470 L 880 560 M 830 450 L 960 450 M 1240 440 L 860 650 M 700 660 L 920 720" />
+        <circle id="tc-w1" class="tc-line" pathLength="1" cx="1300" cy="640" r="150" />
+        <circle id="tc-w2" class="tc-line" pathLength="1" cx="700" cy="660" r="100" />
+        <circle id="tc-w3" class="tc-line" pathLength="1" cx="920" cy="720" r="100" />
+        <g id="tc-g2"><path class="tc-lead" d="M 640 740 L 560 800" /><text class="tc-label" x="560" y="845" text-anchor="middle">Clear thinking</text></g>
+        <g id="tc-g3"><path class="tc-lead" d="M 960 810 L 1000 840" /><text class="tc-label" x="1010" y="880" text-anchor="middle">Bias to action</text></g>
+        <g id="tc-g1"><path class="tc-lead" d="M 1420 730 L 1500 790" /><text class="tc-label" x="1540" y="840" text-anchor="middle">Disagreeability</text></g>
+      </svg>
+    </div>
+    <div id="tc-l1" class="clip" data-start="0" data-duration="8.5" data-track-index="2"><span class="w">That's</span><span class="w">high</span><span class="w">agency.</span></div>
+    <div id="tc-l2" class="clip" data-start="0" data-duration="8.5" data-track-index="3"><span class="w">It</span><span class="w">can</span><span class="w">be</span><span class="w acc">learned.</span></div>
+    <div id="tc-credit" class="clip" data-start="0" data-duration="8.5" data-track-index="4">From “High Agency in 30 Minutes” by George Mack · highagency.com</div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#tc-frame", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, 0);
+      const wheels = ["#tc-w2", "#tc-w3", "#tc-w1"], labels = ["#tc-g2", "#tc-g3", "#tc-g1"];
+      wheels.forEach(function (w, i) {
+        const t = 0.4 + i * 0.45;
+        tl.fromTo(w, { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, t);
+        tl.fromTo(labels[i], { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, t + 0.3);
+      });
+      tl.fromTo("#tc-l1 .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 1.9);
+      tl.fromTo("#tc-l2 .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 2.6);
+      tl.fromTo("#tc-credit", { opacity: 0 }, { opacity: 0.75, duration: 0.3 }, 2.3);
+      window.__timelines["tricycle"] = tl;
+    })();
+  </script>
+</template>

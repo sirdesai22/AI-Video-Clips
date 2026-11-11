@@ -1,0 +1,59 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #f3efe4; }
+    #rt-art { position: absolute; inset: 0; }
+    #rt-art svg { width: 100%; height: 100%; overflow: visible; }
+    #rt-first { fill: none; stroke: #ffad4a; stroke-width: 5; stroke-linecap: round; }
+    .rt-route { fill: none; stroke: #f3efe4; stroke-width: 2.5; stroke-linecap: round; }
+    #rt-text { position: absolute; left: 160px; top: 690px; width: 1600px; }
+    #rt-kick { font-size: 40px; font-weight: 700; opacity: 0.85; margin-bottom: 8px; }
+    #rt-num { white-space: nowrap; font-family: "Archivo Black", sans-serif; font-size: 170px; line-height: 1; color: #ffad4a; letter-spacing: -0.02em; display: inline-block; }
+    #rt-unit { display: inline-block; padding-bottom: 14px; font-family: "Archivo Black", sans-serif; font-size: 64px; line-height: 1.05; letter-spacing: -0.02em; vertical-align: 18px; }
+  </style>
+  <div id="root" data-composition-id="routes" data-start="0" data-duration="7" data-width="1920" data-height="1080">
+    <div id="rt-art" class="clip" data-start="0" data-duration="7" data-track-index="1">
+      <div id="rt-art-in" style="position:absolute;inset:0">
+        <svg viewBox="0 0 1920 1080">
+          <g id="rt-net"></g>
+          <g id="rt-zoom">
+            <path id="rt-first" d="M 330 790 C 760 790, 1080 640, 1560 470" />
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div id="rt-text" class="clip" data-start="0" data-duration="7" data-track-index="2">
+      <div id="rt-kick">From that beach to today:</div>
+      <div style="display:flex;align-items:flex-end;gap:36px"><span id="rt-num">5.58 billion</span><span id="rt-unit">airline seats<br />flown last year</span></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // deterministic route network (seeded LCG): static decoration, built once
+      let s = 1903;
+      function rnd() { s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; }
+      const net = document.querySelector("#rt-net");
+      const NS = "http://www.w3.org/2000/svg";
+      for (let i = 0; i < 150; i++) {
+        const x1 = 80 + rnd() * 1760, y1 = 140 + rnd() * 500;
+        const x2 = 80 + rnd() * 1760, y2 = 140 + rnd() * 500;
+        const mx = (x1 + x2) / 2, my = Math.min(y1, y2) - 60 - Math.abs(x2 - x1) * 0.18;
+        const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", "M " + x1.toFixed(1) + " " + y1.toFixed(1) + " Q " + mx.toFixed(1) + " " + my.toFixed(1) + " " + x2.toFixed(1) + " " + y2.toFixed(1));
+        p.setAttribute("class", "rt-route");
+        p.setAttribute("pathLength", "1");
+        p.style.opacity = (0.25 + rnd() * 0.35).toFixed(2);
+        net.appendChild(p);
+      }
+      const tl = gsap.timeline({ paused: true });
+      // the 1903 flight path pulls back to become one route among many
+      tl.fromTo("#rt-zoom", { scale: 1, x: 0, y: 0, svgOrigin: "945 630" }, { scale: 0.32, x: -330, y: -250, svgOrigin: "945 630", duration: 1.6, ease: "power2.inOut" }, 0.1);
+      tl.fromTo(".rt-route", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.out", stagger: { each: 0.012, from: "start" } }, 0.5);
+      tl.fromTo("#rt-kick", { opacity: 0, filter: "blur(6px)" }, { opacity: 0.85, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 1.6);
+      tl.fromTo("#rt-num", { opacity: 0, filter: "blur(10px)", scale: 0.9, transformOrigin: "0% 100%" }, { opacity: 1, filter: "blur(0px)", scale: 1, duration: 0.3, ease: "expo.out" }, 2.0);
+      tl.fromTo("#rt-unit", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 2.25);
+      // blur swap out
+      tl.to(["#rt-art-in", "#rt-text"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power3.in" }, 6.75);
+      window.__timelines["routes"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ground: #1d5aa6;
+        --ink: #f3efe4;
+        --accent: #ffad4a;
+        --font-display: "Archivo Black", sans-serif;
+        --font-body: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--ground);
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        font-family: var(--font-body);
+      }
+      #blueprint {
+        position: absolute;
+        inset: 0;
+        background-color: var(--ground);
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+          linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size:
+          240px 240px,
+          240px 240px,
+          48px 48px,
+          48px 48px;
+        background-position: 0 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="67"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="blueprint" data-layout-ignore></div>
+
+      <div id="stopwatch" data-composition-id="stopwatch" data-composition-src="compositions/stopwatch.html"
+        data-start="0" data-duration="6.7" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="headline" data-composition-id="headline" data-composition-src="compositions/headline.html"
+        data-start="6.7" data-duration="6.4" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="logic" data-composition-id="logic" data-composition-src="compositions/logic.html"
+        data-start="13.1" data-duration="7.9" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="tunnel" data-composition-id="tunnel" data-composition-src="compositions/tunnel.html"
+        data-start="21" data-duration="7.4" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="engine" data-composition-id="engine" data-composition-src="compositions/engine.html"
+        data-start="28.4" data-duration="6.4" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="crashes" data-composition-id="crashes" data-composition-src="compositions/crashes.html"
+        data-start="34.8" data-duration="7.5" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="flight" data-composition-id="flight" data-composition-src="compositions/flight.html"
+        data-start="42.3" data-duration="9.2" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="routes" data-composition-id="routes" data-composition-src="compositions/routes.html"
+        data-start="51.5" data-duration="7" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <div id="tricycle" data-composition-id="tricycle" data-composition-src="compositions/tricycle.html"
+        data-start="58.5" data-duration="8.5" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080"></div>
+      <audio id="vo-stopwatch" class="clip" src="assets/voice/01-stopwatch.wav" data-start="0.25" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-headline" class="clip" src="assets/voice/02-headline.wav" data-start="6.95" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-logic" class="clip" src="assets/voice/03-logic.wav" data-start="13.35" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-tunnel" class="clip" src="assets/voice/04-tunnel.wav" data-start="21.25" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-engine" class="clip" src="assets/voice/05-engine.wav" data-start="28.65" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-crashes" class="clip" src="assets/voice/06-crashes.wav" data-start="35.05" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-flight" class="clip" src="assets/voice/07-flight.wav" data-start="42.55" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-routes" class="clip" src="assets/voice/08-routes.wav" data-start="51.75" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo-tricycle" class="clip" src="assets/voice/09-tricycle.wav" data-start="58.75" data-track-index="10" data-volume="1"></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #f3efe4; }
+    #lg-bird { position: absolute; left: 110px; top: 250px; width: 820px; height: 520px; }
+    #lg-bird svg { width: 100%; height: 100%; overflow: visible; }
+    .lg-line { fill: none; stroke: #f3efe4; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    #lg-kicker { position: absolute; left: 160px; top: 150px; font-size: 38px; font-weight: 700; opacity: 0.8; }
+    #lg-chain { position: absolute; left: 1010px; top: 210px; width: 820px; }
+    .lg-step { font-family: "Archivo Black", sans-serif; font-size: 78px; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 44px; }
+    .lg-step .acc { color: #ffad4a; }
+  </style>
+  <div id="root" data-composition-id="logic" data-start="0" data-duration="7.9" data-width="1920" data-height="1080">
+    <div id="lg-kicker" class="clip" data-start="0" data-duration="7.9" data-track-index="3">From a sickbed, Wilbur Wright reasoned:</div>
+    <div id="lg-bird" class="clip" data-start="0" data-duration="7.9" data-track-index="1">
+      <div id="lg-bird-in" style="width:100%;height:100%">
+        <svg viewBox="0 0 800 500">
+          <path id="lg-body" class="lg-line" pathLength="1" d="M 380 226 C 402 226, 412 250, 405 278 C 398 300, 362 300, 355 278 C 348 250, 358 226, 380 226 Z M 372 300 L 360 330 L 380 318 L 400 330 L 388 300" />
+          <path id="lg-wing" class="lg-line" pathLength="1" d="M 360 252 C 290 150, 160 120, 30 200 C 150 190, 270 220, 358 270" />
+          <path id="lg-wing2" class="lg-line" pathLength="1" d="M 400 252 C 470 150, 600 120, 770 190 C 650 185, 520 220, 402 270" />
+          <path id="lg-tail" class="lg-line" pathLength="1" d="M 30 200 L 62 222 M 75 180 L 100 210 M 120 166 L 140 198 M 770 190 L 738 214 M 722 172 L 700 204 M 676 160 L 660 194" style="stroke-width:4" />
+          <circle id="lg-eye" cx="380" cy="246" r="6" fill="#f3efe4" />
+        </svg>
+      </div>
+    </div>
+    <div id="lg-chain" class="clip" data-start="0" data-duration="7.9" data-track-index="2">
+      <div class="lg-step" id="lg-s1">Birds fly.</div>
+      <div class="lg-step" id="lg-s2">So flight obeys physics.</div>
+      <div class="lg-step" id="lg-s3">So humans can fly.</div>
+      <div class="lg-step" id="lg-s4">So <span class="acc">I</span> can.</div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#lg-kicker", { opacity: 0, filter: "blur(8px)" }, { opacity: 0.8, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.1);
+      tl.fromTo(["#lg-body", "#lg-tail", "#lg-wing", "#lg-wing2"], { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut", stagger: 0.18 }, 0.1);
+      tl.fromTo("#lg-eye", { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.9);
+      // the wing beats once as "Birds fly" lands
+      tl.fromTo("#lg-wing", { rotation: 0, svgOrigin: "360 260" }, { rotation: 10, svgOrigin: "360 260", duration: 0.35, ease: "power2.inOut", yoyo: true, repeat: 1 }, 1.0);
+      tl.fromTo("#lg-wing2", { rotation: 0, svgOrigin: "400 260" }, { rotation: -10, svgOrigin: "400 260", duration: 0.35, ease: "power2.inOut", yoyo: true, repeat: 1 }, 1.0);
+      const steps = ["#lg-s1", "#lg-s2", "#lg-s3", "#lg-s4"];
+      const at = [0.8, 2.15, 3.5, 4.85];
+      steps.forEach(function (s, i) {
+        tl.fromTo(s, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, at[i]);
+        if (i > 0) tl.to(steps[i - 1], { opacity: 0.38, duration: 0.25, ease: "power2.out" }, at[i]);
+      });
+      // blur swap out
+      tl.to(["#lg-bird-in", "#lg-chain", "#lg-kicker"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power3.in" }, 7.65);
+      window.__timelines["logic"] = tl;
+    })();
+  </script>
+</template>

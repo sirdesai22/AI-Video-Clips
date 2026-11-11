@@ -1,0 +1,42 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; }
+    #hl-paper { position: absolute; inset: 0; background: #ece6d6; }
+    #hl-rule-top { position: absolute; left: 160px; right: 160px; top: 190px; height: 6px; background: #141414; }
+    #hl-rule-bot { position: absolute; left: 160px; right: 160px; top: 212px; height: 2px; background: #141414; }
+    #hl-head { position: absolute; left: 160px; right: 160px; top: 260px; font-family: "League Gothic", sans-serif; font-size: 230px; line-height: 0.92; color: #141414; text-transform: uppercase; letter-spacing: 0.005em; }
+    .w { display: inline-block; margin-right: 0.18em; }
+    #hl-cite { position: absolute; left: 160px; top: 760px; font-size: 38px; font-weight: 700; color: #141414; }
+    #hl-stamp { position: absolute; z-index: 3; left: 1120px; top: 545px; white-space: nowrap; padding: 14px 30px; border: 8px solid #d7261e; color: #d7261e; font-family: "Archivo Black", sans-serif; font-size: 58px; line-height: 1; letter-spacing: -0.01em; }
+  </style>
+  <div id="root" data-composition-id="headline" data-start="0" data-duration="6.4" data-width="1920" data-height="1080">
+    <div id="hl-world" class="clip" data-start="0" data-duration="6.4" data-track-index="1">
+      <div id="hl-shake" style="position:absolute;inset:0">
+      <div id="hl-paper"></div>
+      <div id="hl-rule-top"></div>
+      <div id="hl-rule-bot"></div>
+      <div id="hl-head"><span class="w">Man</span><span class="w">won't</span><span class="w">fly</span><span class="w">for</span><span class="w">a</span><span class="w">million</span><span class="w">years</span></div>
+      <div id="hl-cite">— New York Times headline, months before the first flight</div>
+      <div id="hl-stamp" data-layout-allow-occlusion>SUCCESS RATE: 0%</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      // colour flood: newsprint opens from the centre
+      tl.fromTo("#hl-paper", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(75% at 50% 50%)", duration: 0.45, ease: "power2.inOut" }, 0);
+      tl.fromTo(["#hl-rule-top", "#hl-rule-bot"], { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.5, ease: "expo.out", stagger: 0.05 }, 0.35);
+      // headline printed word by word
+      tl.fromTo("#hl-head .w", { opacity: 0 }, { opacity: 1, duration: 0.05, stagger: 0.1, ease: "none" }, 0.55);
+      tl.fromTo("#hl-cite", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 1.6);
+      // stamp slams
+      tl.fromTo("#hl-stamp", { opacity: 0, scale: 1.8, rotation: -14 }, { opacity: 1, scale: 1, rotation: -7, duration: 0.22, ease: "power4.in" }, 2.9);
+      tl.fromTo("#hl-shake", { x: 0 }, { x: 8, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 3.12);
+      // flood back to blueprint
+      tl.to(["#hl-head", "#hl-cite", "#hl-stamp", "#hl-rule-top", "#hl-rule-bot"], { opacity: 0, duration: 0.15, ease: "power3.in" }, 5.4);
+      tl.to("#hl-paper", { clipPath: "circle(0% at 50% 50%)", duration: 0.4, ease: "power2.inOut" }, 5.5);
+      window.__timelines["headline"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,77 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #f3efe4; }
+    #tn-art { position: absolute; inset: 0; }
+    #tn-art svg { width: 100%; height: 100%; overflow: visible; }
+    .tn-line { fill: none; stroke: #f3efe4; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .tn-air { fill: none; stroke: #f3efe4; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 40 30; opacity: 0.55; }
+    .tn-foil { fill: none; stroke: #f3efe4; stroke-width: 7; stroke-linejoin: round; }
+    #tn-label { position: absolute; left: 330px; top: 236px; font-size: 36px; font-weight: 700; opacity: 0.85; }
+    #tn-count { position: absolute; left: 1290px; top: 90px; width: 500px; text-align: right; font-family: "Archivo Black", sans-serif; font-size: 230px; line-height: 1; color: #ffad4a; letter-spacing: -0.02em; }
+    #tn-line { position: absolute; left: 160px; top: 850px; font-family: "Archivo Black", sans-serif; font-size: 84px; line-height: 1.05; letter-spacing: -0.02em; }
+    .w { display: inline-block; margin-right: 0.24em; }
+  </style>
+  <div id="root" data-composition-id="tunnel" data-start="0" data-duration="7.4" data-width="1920" data-height="1080">
+    <div id="tn-art" class="clip" data-start="0" data-duration="7.4" data-track-index="1">
+      <div id="tn-art-in" style="position:absolute;inset:0">
+        <svg viewBox="0 0 1920 1080">
+          <!-- the tunnel: an open-ended box with a fan at the intake -->
+          <path id="tn-box" class="tn-line" pathLength="1" d="M 320 300 L 1600 300 M 320 760 L 1600 760 M 320 300 L 320 330 M 320 760 L 320 730 M 1600 300 L 1600 330 M 1600 760 L 1600 730" />
+          <circle id="tn-fan" class="tn-line" pathLength="1" cx="240" cy="530" r="150" />
+          <path id="tn-blades" class="tn-line" pathLength="1" d="M 240 530 L 240 400 M 240 530 L 352 595 M 240 530 L 128 595" />
+          <g id="tn-airflow">
+            <path class="tn-air" d="M 420 380 C 800 380, 1000 380, 1560 380" />
+            <path class="tn-air" d="M 420 450 C 800 450, 1000 400, 1560 440" />
+            <path class="tn-air" d="M 420 610 C 800 610, 1000 640, 1560 620" />
+            <path class="tn-air" d="M 420 690 C 800 690, 1000 690, 1560 690" />
+          </g>
+          <g id="tn-foils" transform="translate(980 545)">
+            <path class="tn-foil" id="tn-f0" d="M -300 0 C -250 -30, -50 -45, 300 0 C 0 8, -250 8, -300 0 Z" />
+            <path class="tn-foil" id="tn-f1" d="M -300 0 C -280 -100, -40 -120, 140 -70 C 230 -45, 280 -15, 300 0 C 150 20, -150 40, -260 25 C -290 18, -300 10, -300 0 Z" />
+            <path class="tn-foil" id="tn-f2" d="M -300 10 C -200 -70, 100 -80, 300 10 C 100 -50, -200 -40, -300 10 Z" />
+            <path class="tn-foil" id="tn-f3" d="M -300 0 C -270 -80, -100 -100, 60 -80 C 180 -60, 270 -20, 300 0 C 150 -5, -100 0, -300 0 Z" />
+            <path class="tn-foil" id="tn-f4" d="M -300 0 C -260 -60, -60 -90, 100 -60 C 200 -40, 260 -15, 300 0 C 200 10, 0 20, -200 15 C -270 12, -300 8, -300 0 Z" />
+            <path class="tn-foil" id="tn-f5" pathLength="1" d="M -300 0 C -270 -70, -80 -95, 100 -65 C 210 -45, 270 -18, 300 0 C 150 6, -100 12, -250 10 C -285 8, -300 5, -300 0 Z" />
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div id="tn-label" class="clip" data-start="0" data-duration="7.4" data-track-index="2">A homemade wind tunnel</div>
+    <div id="tn-count" class="clip" data-start="0" data-duration="7.4" data-track-index="3">1</div>
+    <div id="tn-line" class="clip" data-start="0" data-duration="7.4" data-track-index="4"><span class="w">So</span><span class="w">they</span><span class="w">tested</span><span class="w">200</span><span class="w">wing</span><span class="w">shapes.</span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const foils = ["#tn-f0", "#tn-f1", "#tn-f2", "#tn-f3", "#tn-f4", "#tn-f5"];
+      tl.set(foils, { opacity: 0 }, 0);
+      // the first wing draws on where the bird's wing left off
+      tl.set("#tn-f5", { opacity: 1 }, 0);
+      tl.fromTo("#tn-f5", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, 0);
+      tl.fromTo(["#tn-box", "#tn-fan", "#tn-blades"], { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut", stagger: 0.12 }, 0.3);
+      tl.fromTo("#tn-label", { opacity: 0, filter: "blur(6px)" }, { opacity: 0.85, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0.8);
+      tl.fromTo("#tn-airflow", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 1.0);
+      tl.fromTo(".tn-air", { strokeDashoffset: 0 }, { strokeDashoffset: -700, duration: 6, ease: "none" }, 1.0);
+      tl.fromTo("#tn-blades", { rotation: 0, svgOrigin: "240 530" }, { rotation: 1440, svgOrigin: "240 530", duration: 6, ease: "power1.in" }, 1.0);
+      // slot machine through wing shapes while the count runs to 200
+      const t0 = 1.2, step = 0.16, n = 20;
+      let prev = "#tn-f5";
+      for (let i = 0; i < n; i++) {
+        const cur = i === n - 1 ? "#tn-f5" : foils[i % 5];
+        tl.set(prev, { opacity: 0 }, t0 + i * step);
+        tl.set(cur, { opacity: 1 }, t0 + i * step);
+        prev = cur;
+      }
+      const c = { v: 1 };
+      tl.fromTo(c, { v: 1 }, {
+        v: 200, duration: n * step, ease: "power1.in",
+        onUpdate: function () { document.querySelector("#tn-count").textContent = String(Math.round(c.v)); }
+      }, t0);
+      tl.fromTo("#tn-line .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 4.5);
+      // exit: whip left
+      tl.to(["#tn-art-in"], { x: -260, opacity: 0, filter: "blur(14px)", duration: 0.25, ease: "power3.in" }, 7.12);
+      tl.to(["#tn-label", "#tn-count", "#tn-line"], { opacity: 0, duration: 0.2, ease: "power3.in" }, 7.15);
+      window.__timelines["tunnel"] = tl;
+    })();
+  </script>
+</template>

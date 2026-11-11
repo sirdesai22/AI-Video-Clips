@@ -1,0 +1,53 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #f3efe4; }
+    #sw-art { position: absolute; left: 180px; top: 150px; width: 780px; height: 780px; }
+    #sw-art svg { width: 100%; height: 100%; overflow: visible; }
+    .sw-line { fill: none; stroke: #f3efe4; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    #sw-text { position: absolute; left: 1040px; top: 300px; width: 760px; }
+    #sw-count { font-family: "Archivo Black", sans-serif; font-size: 300px; line-height: 1; color: #ffad4a; letter-spacing: -0.02em; }
+    #sw-line { margin-top: 36px; font-family: "Archivo Black", sans-serif; font-size: 80px; line-height: 1.05; letter-spacing: -0.02em; }
+    .w { display: inline-block; margin-right: 0.24em; }
+  </style>
+  <div id="root" data-composition-id="stopwatch" data-start="0" data-duration="6.7" data-width="1920" data-height="1080">
+    <div id="sw-art" class="clip" data-start="0" data-duration="6.7" data-track-index="1">
+      <div id="sw-inner" style="width:100%;height:100%">
+        <svg viewBox="-390 -390 780 780">
+          <path id="sw-crown" class="sw-line" pathLength="1" d="M -40 -345 L 40 -345 M 0 -345 L 0 -315 M -60 -380 L 60 -380 L 60 -345 L -60 -345 Z" />
+          <path id="sw-btn" class="sw-line" pathLength="1" d="M 215 -250 L 250 -285 L 275 -260 L 240 -225" />
+          <circle id="sw-ring" class="sw-line" pathLength="1" cx="0" cy="0" r="310" transform="rotate(-90)" />
+          <circle id="sw-ticks" cx="0" cy="0" r="262" fill="none" stroke="#f3efe4" stroke-width="26" stroke-dasharray="3 24.274" transform="rotate(-90.3)" opacity="0.85" />
+          <g id="sw-hand">
+            <line class="sw-line" x1="0" y1="40" x2="0" y2="-235" style="stroke:#ffad4a;stroke-width:8" />
+          </g>
+          <circle cx="0" cy="0" r="14" fill="#ffad4a" />
+        </svg>
+      </div>
+    </div>
+    <div id="sw-text" class="clip" data-start="0" data-duration="6.7" data-track-index="2">
+      <div id="sw-count">0:00</div>
+      <div id="sw-line"><span class="w">59</span><span class="w">seconds</span><span class="w">in</span><span class="w">the</span><span class="w">air.</span></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      // frame 0 already shows the ring half drawn so the thumbnail reads
+      tl.fromTo("#sw-ring", { strokeDasharray: 1, strokeDashoffset: 0.45 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, 0);
+      tl.fromTo("#sw-ticks", { opacity: 0.35 }, { opacity: 0.85, duration: 0.5, ease: "power2.out" }, 0);
+      tl.fromTo(["#sw-crown", "#sw-btn"], { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut", stagger: 0.12 }, 0.2);
+      // the hand sweeps to 59 s while the counter runs
+      tl.fromTo("#sw-hand", { rotation: 0, svgOrigin: "0 0" }, { rotation: 354, svgOrigin: "0 0", duration: 2.4, ease: "power2.inOut" }, 0.5);
+      const c = { v: 0 };
+      tl.fromTo(c, { v: 0 }, {
+        v: 59, duration: 2.4, ease: "power2.inOut",
+        onUpdate: function () { document.querySelector("#sw-count").textContent = "0:" + String(Math.round(c.v)).padStart(2, "0"); }
+      }, 0.5);
+      tl.fromTo("#sw-count", { scale: 1, transformOrigin: "0% 50%" }, { scale: 1.06, duration: 0.12, ease: "power2.out", yoyo: true, repeat: 1 }, 2.9);
+      tl.fromTo("#sw-line .w", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, stagger: 0.07, ease: "power4.out" }, 3.0);
+      // blur swap out
+      tl.to(["#sw-inner", "#sw-count", "#sw-line"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power3.in" }, 6.45);
+      window.__timelines["stopwatch"] = tl;
+    })();
+  </script>
+</template>

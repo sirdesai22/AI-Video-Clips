@@ -1,0 +1,6 @@
+.venv-kokoro/
+node_modules/
+.superpowers/
+.DS_Store
+**/.hyperframes/
+.next/

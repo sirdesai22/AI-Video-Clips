@@ -52,7 +52,7 @@ export function knobLines(v: Video, recipe: Recipe): string {
           : "- audience: not set; infer it from the input");
         break;
       case "exactWording":
-        if (set(val)) lines.push(`- exact wording: ${q(val)} (owner's choice, BINDING: verbatim, unchanged, where the type's rules say)`);
+        if (set(val)) lines.push(`- exact wording: ${q(val)} (owner's choice, BINDING: verbatim, unchanged, where the type's rules say; if it runs past a field's cap, split it across consecutive scenes without changing a word)`);
         break;
       case "cta":
         if (set(val)) lines.push(`- call to action: ${q(val)} (owner's choice, BINDING: quoted exactly in the final scene's \`onScreen\`)`);

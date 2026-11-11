@@ -23,7 +23,6 @@ describe("createVideoAction", () => {
     if (!r.ok) return;
     expect(r.video.format).toBe("reel");
     expect(r.video.recipe).toBe("explainer");
-    expect(r.video.options.voice).toBeUndefined();
     expect(db.claimNextJob()?.kind).toBe("script");
   });
   it("rejects empty input and unknown formats", () => {
@@ -41,6 +40,16 @@ describe("createVideoAction recipes and voice", () => {
   it("accepts a recipe angle and keeps the chosen voice", () => {
     const r = createVideoAction({ input: "abc topic", recipe: "data-story", options: { angle: "trend", voice: "af_nova" } });
     expect(r).toMatchObject({ ok: true, video: { recipe: "data-story", options: { angle: "trend", voice: "af_nova" } } });
+  });
+  it("leaves the voice unset for a motion graphic with no default", () => {
+    const r = createVideoAction({ input: "abc topic", recipe: "motion-graphic" });
+    expect(r).toMatchObject({ ok: true });
+    if (r.ok) expect(r.video.options.voice).toBeUndefined();
+  });
+  it("rejects a call to action longer than the shape's cap", () => {
+    expect(createVideoAction({ input: "abc topic", options: { cta: "one two three four five six seven" } }))
+      .toMatchObject({ ok: false, status: 400, error: "Keep the call to action to 6 words for this shape" });
+    expect(createVideoAction({ input: "abc topic", format: "landscape", options: { cta: "one two three four five six seven" } })).toMatchObject({ ok: true });
   });
   it("uses a stored default voice only when one is set", () => {
     db.setSetting("default_voice", "bm_george");

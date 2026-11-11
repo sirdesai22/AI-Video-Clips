@@ -41,7 +41,13 @@ export function getDb(): Database.Database {
   `);
   const cols = db.prepare(`PRAGMA table_info(videos)`).all() as { name: string }[];
   if (!cols.some((c) => c.name === "recipe")) {
-    db.exec(`ALTER TABLE videos ADD COLUMN recipe TEXT NOT NULL DEFAULT 'explainer'`);
+    try {
+      db.exec(`ALTER TABLE videos ADD COLUMN recipe TEXT NOT NULL DEFAULT 'explainer'`);
+    } catch (e) {
+      if (!/duplicate column/i.test(String(e))) throw e;
+    }
+    // Upgrade only: the old hard-wired default voice becomes "let the script writer pick".
+    db.exec(`DELETE FROM settings WHERE key='default_voice' AND value='am_michael'`);
   }
   db.exec(`UPDATE videos SET format = 'landscape' WHERE format = 'explainer'`);
   return db;

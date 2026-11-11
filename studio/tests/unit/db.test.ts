@@ -36,6 +36,8 @@ describe("recipe column and format migration", () => {
       title TEXT, status TEXT NOT NULL, stage TEXT, progress INTEGER NOT NULL DEFAULT 0,
       session_id TEXT, error TEXT, script_version INTEGER NOT NULL DEFAULT 0,
       render_version INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+      CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      INSERT INTO settings VALUES ('default_voice', 'am_michael');
       INSERT INTO videos (id, format, input, options, status, created_at, updated_at)
       VALUES ('old1', 'explainer', 'x', '{}', 'ready', 't', 't'), ('old2', 'reel', 'y', '{}', 'ready', 't', 't');`);
     old.close();
@@ -45,6 +47,7 @@ describe("recipe column and format migration", () => {
       db.closeDb();
       expect(db.getVideo("old1")).toMatchObject({ format: "landscape", recipe: "explainer" });
       expect(db.getVideo("old2")?.format).toBe("reel");
+      expect(db.getSetting("default_voice")).toBeNull();
       db.closeDb();
       expect(db.getVideo("old1")?.format).toBe("landscape"); // idempotent re-open
     } finally {

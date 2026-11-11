@@ -3,7 +3,7 @@ import {
   addScript, enqueueJob, getScript, getSetting, getVideo, listRenders, listScripts, updateVideo, createVideo,
 } from "./db";
 import { getRecipe, RECIPE_IDS } from "./recipes";
-import { validateScript, VOICE_RE, type Script } from "./script-schema";
+import { LIMITS, validateScript, VOICE_RE, type Script } from "./script-schema";
 import type { Video } from "./types";
 
 export type ActionResult = { ok: true; video: Video } | { ok: false; error: string; status: number };
@@ -34,6 +34,8 @@ export function createVideoAction(body: unknown): ActionResult {
     Object.entries(p.data.options).filter(([, val]) => val && String(val).trim()),
   ) as Record<string, string>;
   if (options.angle && !getRecipe(p.data.recipe).angles.includes(options.angle)) return fail("Unknown angle for this video type", 400);
+  const cap = LIMITS[p.data.format].onScreenWords;
+  if (options.cta && options.cta.trim().split(/\s+/).length > cap) return fail(`Keep the call to action to ${cap} words for this shape`, 400);
   if (options.voice && !VOICE_RE.test(options.voice)) return fail("Unknown voice", 400);
   // No fallback voice: with none chosen, the script writer picks one that matches the tone.
   const stored = getSetting("default_voice");

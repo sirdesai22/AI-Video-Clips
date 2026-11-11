@@ -107,7 +107,7 @@ export const scriptJsonSchema = {
     title: { type: "string" },
     idea: { type: "string" },
     angle: { type: "string" },
-    voice: { type: "string", pattern: "^[a-z]{2}_[a-z0-9]+$" },
+    voice: { type: "string", pattern: "^[a-z]{2}_[a-z0-9]+$", enum: ["am_michael", "am_adam", "af_heart", "af_nova", "af_sky", "bm_george", "bf_emma", "bf_isabella"] },
     look: {
       type: "object",
       additionalProperties: false,

@@ -4,7 +4,7 @@
 - WebFetch the product URL (and at most two inner pages it links to, such as features or pricing). Note: the product name, the one new thing, real feature names, real UI labels, real numbers, the site's own call-to-action wording, and any brand colours you can see.
 - Every claim on screen or in the voice traces to the site or the owner's words. Never invent a feature, a control, a screen, a number, a customer or a testimonial. A release ("2.0", "what's new") is not one thing: take its headline.
 
-### Story shape by angle (owner's angle if set, else launch)
+### Story shape by angle (owner's angle if set; else social on a reel, launch on landscape)
 - **launch** (~35 s; scale it): hook ~8% (the need, or the feature already working) → tension ~12% (the old way failing on screen) → reveal ~8% (the product named, about 20–30% in) → proof ~40% (3–6 verbs, one per scene: paste, pick, watch it build, ship) → payoff ~20% (the output arrives, the biggest moment, 60–80% in) → claim ~8% (the one thing, one line) → end card ~8%.
 - **tour**: the homepage, two inner pages, the footer; editorial pace, a showcase, not a sales pitch.
 - **social** (vertical teaser, ~20 s): the problem in one line of large type → two feature beats, each one real screen with a caption of three words or fewer → the end card, held still.

@@ -41,6 +41,6 @@
 - angle count-up; idea "[ARR reached $4.2M]".
 - concept: device "A number lands"; form "One frame that rebuilds"; spectacle "[a burst of green ticks as +312% stamps in]".
 - look: ground [#E8E6DF], ink [#16181D], accent [#0F9D58]; type "[condensed heavy sans, number at 40% of frame height, tabular figures]"; captionStyle "none"; voiceTone "none"; musicMood "[tight percussive sting, hit on the landing]".
-- 1 (0–1 s): spoken "" · onScreen "[ARR]" · visual "[the label fades in small, top centre]".
+- 1 (0–1 s): spoken "" · onScreen "[ARR]" · visual "[the label is large and already on screen at frame 0, filling the upper half, then holds]".
 - 2 (1–4 s): spoken "" · onScreen "[$4.2M]" · visual "[the number counts up to $4.2M with an odometer roll, filling the centre, easing out]" · block "apple-money-count".
 - 3 (4–6 s): spoken "" · onScreen "[+312% YoY]" · visual "[the delta stamps in green under the number, then everything settles into a still hold]".

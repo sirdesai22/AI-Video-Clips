@@ -11,6 +11,7 @@
     "setup": "node scripts/setup.mjs",
     "test": "vitest run",
     "e2e": "playwright test",
+    "e2e:serve": "rm -rf data/e2e.db* data/e2e-videos && AGENT=fake FAKE_DELAY_MS=150 DB_PATH=$PWD/data/e2e.db VIDEOS_DIR=$PWD/data/e2e-videos concurrently -k \"next dev -H 127.0.0.1 -p 3100\" \"tsx worker/start.ts\"",
     "lint": "eslint"
   },
   "dependencies": {

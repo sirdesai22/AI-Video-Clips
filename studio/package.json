@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 127.0.0.1 -p 3000",
-    "dev:all": "concurrently -k -n web,worker \"next dev -H 127.0.0.1 -p 3000\" \"tsx watch worker/index.ts\"",
+    "dev:all": "concurrently -k -n web,worker \"next dev -H 127.0.0.1 -p 3000\" \"tsx watch worker/start.ts\"",
     "build": "next build",
-    "start": "concurrently -k -n web,worker \"next start -H 127.0.0.1 -p 3000\" \"tsx worker/index.ts\"",
-    "worker": "tsx worker/index.ts",
+    "start": "concurrently -k -n web,worker \"next start -H 127.0.0.1 -p 3000\" \"tsx worker/start.ts\"",
+    "worker": "tsx worker/start.ts",
     "setup": "node scripts/setup.mjs",
     "test": "vitest run",
     "e2e": "playwright test",

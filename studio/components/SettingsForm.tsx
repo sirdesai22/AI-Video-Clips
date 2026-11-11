@@ -1,18 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { BottomBar } from "./ui";
+import { AUTO_VOICE_LABEL, VOICES } from "./voices";
 
 type Heygen = "signed_in" | "signed_out" | "unknown";
 type Form = { defaultVoice: string; defaultFormat: string; model: string };
-
-const VOICES = [
-  { id: "am_michael", label: "Michael (US, calm)" },
-  { id: "am_adam", label: "Adam (US)" },
-  { id: "af_heart", label: "Heart (US, warm)" },
-  { id: "af_nova", label: "Nova (US)" },
-  { id: "bm_george", label: "George (UK)" },
-  { id: "bf_emma", label: "Emma (UK)" },
-];
 
 function Labeled({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -24,7 +16,7 @@ function Labeled({ label, children }: { label: string; children: React.ReactNode
 }
 
 export default function SettingsForm() {
-  const [form, setForm] = useState<Form>({ defaultVoice: "am_michael", defaultFormat: "reel", model: "" });
+  const [form, setForm] = useState<Form>({ defaultVoice: "", defaultFormat: "reel", model: "" });
   const [heygen, setHeygen] = useState<Heygen | "checking">("checking");
   const [loadError, setLoadError] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -41,7 +33,7 @@ export default function SettingsForm() {
   useEffect(() => {
     fetch("/api/settings?heygen=0")
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-      .then((d) => { setForm({ defaultVoice: d.defaultVoice, defaultFormat: d.defaultFormat, model: d.model }); setLoaded(true); })
+      .then((d) => { setForm({ defaultVoice: d.defaultVoice ?? "", defaultFormat: d.defaultFormat, model: d.model }); setLoaded(true); })
       .catch(() => setLoadError(true));
     void checkHeygen(false);
   }, []);
@@ -87,6 +79,7 @@ export default function SettingsForm() {
       </Labeled>
       <Labeled label="Default voice">
         <select className="field" value={form.defaultVoice} onChange={set("defaultVoice")}>
+          <option value="">{AUTO_VOICE_LABEL}</option>
           {VOICES.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
         </select>
       </Labeled>

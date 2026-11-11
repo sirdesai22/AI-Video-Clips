@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { StatusChip } from "./ui";
+import { RECIPE_LABELS } from "./recipe-labels";
 import type { Video } from "@/lib/types";
 
 type Row = Video & { posterUrl: string | null };
@@ -26,7 +27,10 @@ export default function RecentVideos() {
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-base font-medium">{v.title ?? v.input.slice(0, 80)}</div>
-            <StatusChip status={v.status} progress={v.progress} />
+            <div className="flex items-center gap-2">
+              <StatusChip status={v.status} progress={v.progress} />
+              <span className="text-sm text-muted">{RECIPE_LABELS[v.recipe] ?? v.recipe}</span>
+            </div>
           </div>
         </Link>
       ))}

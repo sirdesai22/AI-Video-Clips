@@ -16,17 +16,35 @@ function withScript() {
 }
 
 describe("createVideoAction", () => {
-  it("defaults to a reel with the default voice and queues a script job", () => {
+  it("defaults to a reel, explainer, no forced voice, and queues a script job", () => {
     const r = createVideoAction({ input: "a topic about bees" });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.video.format).toBe("reel");
-    expect(r.video.options.voice).toBe("am_michael");
+    expect(r.video.recipe).toBe("explainer");
+    expect(r.video.options.voice).toBeUndefined();
     expect(db.claimNextJob()?.kind).toBe("script");
   });
   it("rejects empty input and unknown formats", () => {
     expect(createVideoAction({ input: " " })).toMatchObject({ ok: false, status: 400 });
     expect(createVideoAction({ input: "abc topic", format: "square" })).toMatchObject({ ok: false, status: 400 });
+  });
+});
+
+describe("createVideoAction recipes and voice", () => {
+  it("rejects unknown recipes, angles and malformed voices", () => {
+    expect(createVideoAction({ input: "abc topic", recipe: "nope" })).toMatchObject({ ok: false, status: 400 });
+    expect(createVideoAction({ input: "abc topic", options: { angle: "bogus" } })).toMatchObject({ ok: false, status: 400 });
+    expect(createVideoAction({ input: "abc topic", options: { voice: "Bad Voice" } })).toMatchObject({ ok: false, status: 400 });
+  });
+  it("accepts a recipe angle and keeps the chosen voice", () => {
+    const r = createVideoAction({ input: "abc topic", recipe: "data-story", options: { angle: "trend", voice: "af_nova" } });
+    expect(r).toMatchObject({ ok: true, video: { recipe: "data-story", options: { angle: "trend", voice: "af_nova" } } });
+  });
+  it("uses a stored default voice only when one is set", () => {
+    db.setSetting("default_voice", "bm_george");
+    const r = createVideoAction({ input: "abc topic" });
+    expect(r).toMatchObject({ ok: true, video: { options: { voice: "bm_george" } } });
   });
 });
 

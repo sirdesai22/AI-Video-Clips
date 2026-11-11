@@ -3,7 +3,7 @@ import {
   addScript, enqueueJob, getScript, getSetting, getVideo, listRenders, listScripts, updateVideo, createVideo,
 } from "./db";
 import { getRecipe, RECIPE_IDS } from "./recipes";
-import { validateScript, type Script } from "./script-schema";
+import { validateScript, VOICE_RE, type Script } from "./script-schema";
 import type { Video } from "./types";
 
 export type ActionResult = { ok: true; video: Video } | { ok: false; error: string; status: number };
@@ -30,8 +30,14 @@ const CreateSchema = z.object({
 export function createVideoAction(body: unknown): ActionResult {
   const p = CreateSchema.safeParse(body);
   if (!p.success) return fail(p.error.issues[0]?.message ?? "Invalid input", 400);
-  const options = Object.fromEntries(Object.entries(p.data.options).filter(([, val]) => val && String(val).trim()));
-  options.voice = options.voice || getSetting("default_voice") || "am_michael";
+  const options: Record<string, string> = Object.fromEntries(
+    Object.entries(p.data.options).filter(([, val]) => val && String(val).trim()),
+  ) as Record<string, string>;
+  if (options.angle && !getRecipe(p.data.recipe).angles.includes(options.angle)) return fail("Unknown angle for this video type", 400);
+  if (options.voice && !VOICE_RE.test(options.voice)) return fail("Unknown voice", 400);
+  // No fallback voice: with none chosen, the script writer picks one that matches the tone.
+  const stored = getSetting("default_voice");
+  if (!options.voice && stored && VOICE_RE.test(stored)) options.voice = stored;
   const video = createVideo({ format: p.data.format, recipe: p.data.recipe, input: p.data.input, options });
   enqueueJob(video.id, "script", {});
   return { ok: true, video };

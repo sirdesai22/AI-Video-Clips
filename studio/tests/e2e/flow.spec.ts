@@ -5,16 +5,21 @@ test("reel: script → edit → approve → result → change", async ({ page })
 
   await expect(page.getByRole("radio", { name: /Reel/ })).toHaveAttribute("aria-checked", "true");
   await expect(page.getByPlaceholder("e.g. bold, calm, funny")).toBeHidden();
-  await page.getByPlaceholder("Paste links, a story, or a topic").fill("https://www.highagency.com/");
+  await expect(page.getByRole("radio", { name: /Explainer/ })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("radio", { name: /Explainer/ }).click();
+  await page.getByRole("textbox", { name: /about/ }).fill("https://www.highagency.com/");
   await page.getByRole("button", { name: "Write script" }).click();
 
   await expect(page.getByRole("heading", { name: "The 59 seconds that made flight" })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("Scene 1 · hook")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Look" }).getByTestId("swatch")).toHaveCount(3);
 
   await page.getByRole("button", { name: "Edit", exact: true }).click();
   await page.getByLabel("Scene 5 on screen").fill("You can learn it");
+  await page.getByLabel("Accent").fill("#112233");
   await page.getByRole("button", { name: "Save edits" }).click();
   await expect(page.getByText(/· v2$/)).toBeVisible();
+  await expect(page.getByText("#112233", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Approve & make video" }).click();
   // The HeyGen auth check can take many seconds: wait for the warning card or the progress screen.

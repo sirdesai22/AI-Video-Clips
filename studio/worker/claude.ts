@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import path from "node:path";
-import { fixturesDir } from "../lib/paths";
+import fs from "node:fs";
+import { agentPidFile, fixturesDir } from "../lib/paths";
 import { getSetting } from "../lib/db";
 
 export interface RunOptions {
@@ -49,6 +50,10 @@ export function runClaude(o: RunOptions): Promise<RunResult> {
       return;
     }
 
+    try {
+      if (child.pid) fs.writeFileSync(agentPidFile(), String(child.pid));
+    } catch { /* best effort */ }
+
     const killGroup = (sig: NodeJS.Signals) => {
       try { process.kill(-child.pid!, sig); } catch { /* already gone */ }
     };
@@ -67,6 +72,7 @@ export function runClaude(o: RunOptions): Promise<RunResult> {
       clearTimeout(timer);
       clearTimeout(graceTimer);
       process.removeListener("exit", onParentExit);
+      try { fs.rmSync(agentPidFile(), { force: true }); } catch { /* best effort */ }
       child.stdout?.destroy();
       child.stderr?.destroy();
       if (buf.trim()) emit(buf.trim());

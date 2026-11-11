@@ -1,0 +1,19 @@
+{
+  "title": "The 59 seconds that made flight",
+  "idea": "Agency is a skill: two bike mechanics proved it by flying.",
+  "angle": "story",
+  "voice": "am_michael",
+  "estSeconds": 30,
+  "scenes": [
+    { "spoken": "Fifty-nine seconds. That's how long the first real flight lasted.", "onScreen": "0:59 in the air", "visual": "Stopwatch hand sweeps to 59", "estSeconds": 4 },
+    { "spoken": "Newspapers said humans would not fly for a million years.", "onScreen": "Success rate: 0%", "visual": "Newsprint headline with a red stamp", "estSeconds": 5 },
+    { "spoken": "So the brothers built their own wind tunnel and tested two hundred wings.", "onScreen": "200 wing shapes", "visual": "Wing profiles flicker inside a tunnel", "estSeconds": 6 },
+    { "spoken": "Engines were too heavy, so they built a one hundred eighty pound one.", "onScreen": "180 lb engine", "visual": "Scale tips, then balances", "estSeconds": 6 },
+    { "spoken": "That is high agency. And you can learn it.", "onScreen": "Agency is learnable", "visual": "Tricycle with three labelled wheels", "estSeconds": 5 }
+  ],
+  "sources": [{ "url": "https://www.highagency.com/", "ok": true }],
+  "claims": [
+    { "text": "First flight lasted 59 seconds", "sceneIndex": 0, "source": "https://www.highagency.com/" },
+    { "text": "Tested 200 wing shapes", "sceneIndex": 2, "source": "https://www.highagency.com/" }
+  ]
+}

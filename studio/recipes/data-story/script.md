@@ -15,12 +15,16 @@
 - One number per scene, at most. Never two count-ups at once.
 - `onScreen` is the formatted number or the chart's title: "$4.2M", "41%", "3× since 2019". The chart's one point goes in its title.
 - `visual`: name the picture and the encoding: which chart (bar, line, map), which series is highlighted, which are grey, the annotation's text, and the source line in small type ("Source: [name], [year]").
-- Every count-up is written as "counts up to [value] in about 1.4 s, then holds settled". Never "from 0".
+- Every count-up is written as "counts up to [value] in about 1.4 s, then holds settled": 1.2–1.6 s on an ease-out, landing on the exact source value, then a hold. The scene never opens on a number already moving; the count starts once the scene has set it up.
 - `motion` (optional): e.g. "bars stagger 60 ms apart, labels count with them, no overshoot". `transition` (optional): with its cause, e.g. "the camera dives into the 2024 bar, which becomes the next ground". `block` (optional): `data-chart`, `apple-money-count`, `us-map`, `us-map-bubble`, `us-map-flow`, `us-map-hex`, `spain-map`, `world-map`, `nyc-paris-flight`.
 
 ### Hook and ending
 - Scene 1 makes the number matter before it appears: a situation or a question the audience has. Not "Let's look at the data".
 - The last scene states the takeaway in one line over the settled chart or number, held at least 2 s. No new number in the last scene.
+
+### The owner's exact wording and call to action
+- Exact wording goes in verbatim, unchanged, in the scene and field it names (`spoken` or `onScreen`); if it names no scene, put it where it fits best, still unchanged.
+- A call to action goes on the final scene, quoted exactly in `onScreen`, after the takeaway has landed.
 
 ### Words and time
 - About 2.2 spoken words a second, 8–16 words a scene (19 hard cap). Leave room: a count-up needs about 1.4 s of picture plus its hold.
@@ -38,6 +42,6 @@
 ### Example of a strong data story (slots in [brackets])
 - idea "[Working from home went from rare to normal in five years]"; angle trend; claims carry [the source's 2019 and 2024 shares].
 - concept: device "A number lands"; form "One frame that rebuilds"; spectacle "[the 2024 point rises off the line and becomes a skyline of home offices]".
-- 1: spoken "[In 2019, you probably knew one person who worked from home.]" · onScreen "[2019]" · visual "[a single lit window in a dark street, a small label: 2019]".
-- 2: spoken "[By 2024, it was nearly one in three.]" · onScreen "[28% by 2024]" · visual "[a line draws from 2019 to 2024; the end value counts up to [28%] in about 1.4 s, then holds; source line: 'Source: [name], [year]']" · block "data-chart".
+- 1: spoken "[In 2019, six percent of workdays happened at home.]" · onScreen "[6% in 2019]" · visual "[a sunlit kitchen table filling the frame, a closed laptop on it, a wall calendar showing 2019; the 6% lands on the laptop lid; source line under it]".
+- 2: spoken "[By 2024, it was twenty-eight percent.]" · onScreen "[28% by 2024]" · visual "[a line draws from 2019 to 2024; the end value counts up to [28%] in about 1.4 s, then holds; source line: 'Source: [name], [year]']" · block "data-chart".
 - last: spoken "[The office didn't disappear. It moved into the spare room.]" · onScreen "[The office moved home]" · visual "[the settled chart, the 2024 point in the accent]".

@@ -20,7 +20,8 @@
 
 ### Hook and ending
 - Frame 0 is the thumbnail: something already on screen that makes a stranger stay. Never a greeting, a logo alone, or the topic's name as a title card.
-- The last scene lands the one thing in one line and holds. A call to action only if the owner gave one, quoted exactly.
+- The last scene lands the one thing in one line and holds. A call to action goes on the final scene, quoted exactly in `onScreen`, and only if the owner gave one.
+- The owner's exact wording goes in verbatim, unchanged, in the scene and field it names (`spoken` or `onScreen`); if it names no scene, put it where it fits best, still unchanged.
 - Never "unlock", "seamless", "supercharge", "game-changer", "revolutionize", "effortless".
 
 ### Words and time
@@ -40,5 +41,5 @@
 - idea "[Our bakery has made the same sourdough every morning for 40 years]".
 - concept: device "A moment in someone's day"; form "One continuous take"; spectacle "[the oven door opens and the light floods the whole frame warm]".
 - look: ground [#7A2E1D], ink [#FBEFD9], accent [#F2B33D]; type "[rounded heavy sans, titles 8% of frame height]"; captionStyle "caption-weight-shift"; voiceTone "[warm older male, slow]"; musicMood "[soft acoustic guitar, 75 bpm, under -18 dB]".
-- 1: spoken "[It's four in the morning, and the street is still dark.]" · onScreen "[4:00 AM]" · visual "[a single lit shop window on a dark street, a clock reading 4:00]".
-- last: spoken "[Forty years, and the first loaf still comes out at six.]" · onScreen "[Every morning since [1985]]" · visual "[the loaf on the counter as the street brightens; the line lands and holds]".
+- 1: spoken "[It's four in the morning, and the dough has been rising since midnight.]" · onScreen "[4:00 AM]" · visual "[close on floured hands folding dough on a wooden bench, flour drifting in the beam of one bulb, a kitchen timer reading 4:00]".
+- last: spoken "[Forty years, and the first loaf still comes out at six.]" · onScreen "[Every morning since [1985]]" · visual "[the loaf set on the bench where the dough was, steam rising; the line lands and holds]".

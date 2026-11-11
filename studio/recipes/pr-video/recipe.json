@@ -7,7 +7,7 @@
   "scenes": { "min": 3, "max": 10 },
   "duration": { "reel": "about 20–40 s", "landscape": "about 30–70 s, sized to the PR" },
   "angles": ["changelog", "feature-reveal", "fix", "refactor"],
-  "knobs": ["angle", "palette", "voiceTone", "musicMood", "length", "audience", "exactWording", "cta", "voice"],
+  "knobs": ["angle", "palette", "voiceTone", "musicMood", "length", "audience", "exactWording", "voice"],
   "skillRefs": [
     "references/film.md",
     "references/types/explainer.md",

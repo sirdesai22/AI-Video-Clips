@@ -2,7 +2,8 @@
 
 ### No narration
 - Every scene's `spoken` is exactly "" (empty). No voice, no voice tone.
-- `onScreen` carries the exact words the viewer reads, quoted from the owner where given. Kinetic type: 3–7 words a scene.
+- `onScreen` carries the exact words the viewer reads, quoted from the owner where given. Kinetic type: 3–6 words a beat on a reel (the app rejects more than 6), up to 7 on landscape.
+- The owner's exact wording goes verbatim into `onScreen` of the beat it names (there is no `spoken` here); if it runs past the word cap, split it across beats without changing a word. A call to action goes in `onScreen` of the final beat, quoted exactly.
 - A scene here is a beat. 1–3 beats is normal; 6 is the ceiling.
 
 ### Shape: beats with exact seconds
@@ -16,7 +17,7 @@
 - **kinetic-title**: words snap or slide in one by one, the last word becomes the image, then hold.
 - **count-up**: a small label → the number rolls up TO its value in 1.2–1.6 s and eases out → a delta stamps in → hold.
 - **chart**: title and subtitle → bars reveal staggered with counting labels → the leader pulses once → hold.
-- **social-post**: a real post's exact text and author, assembled and reacted to, then held.
+- **social-post**: a real post's exact text and author, assembled and reacted to, then held. The text and author come only from the owner's input or a page you actually read. If you have neither, list that source with `ok: false` and a note asking the owner to paste the post's text; never write a post yourself.
 - **map-route**: a marker at the origin → the path travels → a landing pop at the destination → settled map.
 
 ### Facts and copy

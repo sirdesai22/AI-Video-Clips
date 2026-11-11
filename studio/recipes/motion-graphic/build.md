@@ -10,7 +10,7 @@
 - Movement must carry meaning. Animate only what is live (the number, the line, the route); a landed title is dead still.
 
 ### Technique
-- Kinetic type: 3–7 words a beat; one hero word at display scale (titles 4–9% of frame height, hero words up to 60–90% of the width). Vary entrances: per-word blur-in 0.13 s, 0.067 s apart; grey-to-ink; per-letter for a name, 0.1 s apart.
+- Kinetic type: 3–6 words a beat on a reel, up to 7 on landscape; one hero word at display scale (titles 4–9% of frame height, hero words up to 60–90% of the width). Vary entrances: per-word blur-in 0.13 s, 0.067 s apart; grey-to-ink; per-letter for a name, 0.1 s apart.
 - Count-up: tabular figures (`font-variant-numeric: tabular-nums`), fixed digit columns, counts TO the value in 1.2–1.6 s on an ease-out, then holds; it lands on a hard stop or a downbeat. Never overshoot a number.
 - Chart: frame and axis → data draws in, staggered (list items 40–80 ms apart) → one annotation on the point that matters → the leader pulses once → hold.
 - Overshoot only on physical objects (cards, flaps), never on text, UI or numbers. Snappy = `power4.out` at about 0.2–0.4 s; dramatic = `expo.out`.
@@ -33,4 +33,5 @@
 - Narration or captions of any kind.
 - Glow, bloom, neon, floating particles as decoration, purple or blue gradients.
 - Breathing or floating loops on the final title; a frozen tail; ending on a transition's hand-off frame.
-- Stretching 5 s of content to fill 12 s; unformatted numbers; a count that starts at 0 and crawls.
+- Stretching 5 s of content to fill 12 s; unformatted numbers.
+- A slow or open-ended count: every count runs 1.2–1.6 s on an ease-out, lands on the exact source value and holds; the beat never opens on a number already moving.

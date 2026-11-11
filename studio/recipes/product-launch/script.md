@@ -20,6 +20,10 @@
 - Last scene is the end card: the product name and ONE call to action, the owner's wording or the site's own button text, quoted exactly in `onScreen`.
 - Never "unlock", "seamless", "supercharge", "game-changer", "revolutionize", "effortless", or "in seconds" unless the site measured it.
 
+### The owner's exact wording and call to action
+- Exact wording goes in verbatim, unchanged, in the scene and field it names (`spoken` or `onScreen`); if it names no scene, put it where it fits best, still unchanged.
+- The owner's call to action goes on the final scene, quoted exactly in `onScreen`; it replaces the site's own button text.
+
 ### Words and time
 - About 2.2 spoken words a second, 8–15 words a scene (19 hard cap). A 30 s film is about 60 spoken words; a 45 s one about 90.
 - The process runs fast; the payoff gets the most time. A length is a range, never padded.

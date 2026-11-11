@@ -29,6 +29,15 @@ describe("recipes", () => {
     expect(getRecipe("product-launch").needsUrl).toBe(true);
     expect(getRecipe("pr-video").needsUrl).toBe(true);
     expect(getRecipe("explainer").needsUrl).toBe(false);
+    expect(getRecipe("pr-video").knobs).not.toContain("cta");
+  });
+
+  it("explains the cta and exactWording knobs in script.md wherever a recipe exposes them", () => {
+    for (const r of listRecipes()) {
+      const text = recipeText(r.id, "script").toLowerCase();
+      if (r.knobs.includes("cta")) expect(text, r.id).toContain("call to action goes");
+      if (r.knobs.includes("exactWording")) expect(text, r.id).toContain("exact wording goes");
+    }
   });
 
   it("returns non-empty script and build text for each recipe", () => {

@@ -3,6 +3,7 @@
 ### Read the PR first (WebFetch)
 - The PR page: title, state (open, merged, closed), merge date, what it says it fixes or adds. Read the description for facts; never read it aloud.
 - The diff: the PR URL plus `.diff` (e.g. `https://github.com/<owner>/<repo>/pull/<n>.diff`). This is where every hunk you show comes from.
+- WebFetch hands you a model-processed summary and can paraphrase code. Ask it for the changed lines exactly, character for character, with their `+`/`-` markers. If the result looks summarised (prose, "…", tidied names, missing markers), refetch with a narrower prompt (one file or one hunk). If it still is not exact, drop that hunk. Never reconstruct code from memory.
 - The commits: the PR URL plus `/commits`, to credit the commit authors (by commit count), not only the opener. Skip bots.
 - The version: `https://github.com/<owner>/<repo>/releases`. Use the first non-draft release published at or after the merge; else the default branch's `package.json` version (`https://raw.githubusercontent.com/<owner>/<repo>/HEAD/package.json`), labelled "unreleased"; else no version, only the repo. Never invent a version. Put it in `claims` with its source.
 - A page you cannot read (private repo, error): `sources` with `ok: false`; do not fill the gap from memory.
@@ -26,6 +27,7 @@
 - Scene 1: the user's problem or the new ability, in plain words. Never "This PR…", never an @handle.
 - Last scene `onScreen`: the version and the repo, e.g. "v2.4.0 · owner/repo"; without a version, the repo only. `spoken` says how to get it, and may thank the authors by name.
 - Speak people's names, not @handles (TTS reads handles aloud).
+- The owner's exact wording goes in verbatim, unchanged, in the scene and field it names (`spoken` or `onScreen`); if it names no scene, put it where it fits best. It never replaces the version-and-repo ending, which is fixed.
 
 ### Words and time
 - Length from the diff size (additions plus deletions), as a ceiling: up to 50 lines about 20–40 s; 50–200 about 40–70 s; larger, the recipe's top length.

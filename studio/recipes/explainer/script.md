@@ -21,6 +21,10 @@
 - Scene 1 `onScreen` works muted: the question's key words or the surprising number.
 - The last scene states the one idea in one line, in the viewer's words. No brand end card unless the owner gave a call to action.
 
+### The owner's exact wording and call to action
+- Exact wording goes in verbatim, unchanged, in the scene and field it names (`spoken` or `onScreen`); if it names no scene, put it where it fits best, still unchanged.
+- A call to action goes on the final scene, quoted exactly in `onScreen`, after the one-idea line has landed (the final scene may say both).
+
 ### Words and time
 - About 2.2 spoken words a second. Aim for 10–16 words a scene (19 is the hard cap).
 - Total spoken: about 65–100 words for a reel, at most about 155 for landscape. Trim words, never pad.
